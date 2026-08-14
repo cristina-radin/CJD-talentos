@@ -263,7 +263,7 @@ export async function initProfile(session) {
     const path = `${session.user.id}/foto.${ext}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('fotos')
+      .from('fotos_perfil')
       .upload(path, file, { upsert: true });
 
     if (uploadError) {
@@ -272,7 +272,7 @@ export async function initProfile(session) {
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage.from('fotos').getPublicUrl(path);
+    const { data: publicUrlData } = supabase.storage.from('fotos_perfil').getPublicUrl(path);
     const fotoUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
 
     const { error: saveError } = await supabase.from('members').update({ foto_url: fotoUrl }).eq('email', email);
