@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient.js';
 import { ESTILOS, ASOCIACIONES } from './config.js';
 import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
+import { openLightbox } from './lightbox.js';
 
 let allMembers = [];
 const activeEstilos = new Set();
@@ -138,6 +139,7 @@ function renderResults(members) {
       const estilos = Array.isArray(m.estilos) ? m.estilos : [];
       return `
         <div class="member-card">
+          ${m.foto_url ? `<img class="member-photo" src="${m.foto_url}" alt="Foto de ${m.nombre ?? ''}" data-full="${m.foto_url}" />` : ''}
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
           <div class="meta">
             ${[m.ciudad, m.titulacion, m.area_titulacion, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ')}
@@ -151,6 +153,10 @@ function renderResults(members) {
       `;
     })
     .join('');
+
+  grid.querySelectorAll('.member-photo').forEach((img) => {
+    img.addEventListener('click', () => openLightbox(img.dataset.full));
+  });
 }
 
 export async function initSearch() {

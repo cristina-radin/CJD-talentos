@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient.js';
 import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
+import { openLightbox } from './lightbox.js';
 
 let allMembers = [];
 let dialogEl = null;
@@ -60,6 +61,7 @@ function renderDetail(row) {
   const idiomas = Array.isArray(row.idiomas) ? row.idiomas : [];
 
   return `
+    ${row.foto_url ? `<img class="detail-photo" src="${row.foto_url}" alt="" data-full="${row.foto_url}" />` : ''}
     <h2 style="margin:0 0 4px">${row.nombre ?? ''} ${row.apellidos ?? ''}</h2>
     <p class="count-line">${row.email ?? ''}</p>
 
@@ -117,7 +119,10 @@ function ensureDialog() {
 
 function openDetail(row) {
   const dialog = ensureDialog();
-  dialog.querySelector('.member-dialog-body').innerHTML = renderDetail(row);
+  const body = dialog.querySelector('.member-dialog-body');
+  body.innerHTML = renderDetail(row);
+  const photo = body.querySelector('.detail-photo');
+  if (photo) photo.addEventListener('click', () => openLightbox(photo.dataset.full));
   dialog.showModal();
 }
 

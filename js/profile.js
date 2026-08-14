@@ -42,6 +42,14 @@ function formHtml(m) {
       <fieldset>
         <legend>Datos del directorio</legend>
         <div class="form-grid">
+          <div class="full">
+            <label>Foto</label>
+            <div class="photo-upload-row">
+              <img id="p-foto-preview" class="photo-preview" src="${m.foto_url ?? ''}" alt="" style="${m.foto_url ? '' : 'display:none'}" />
+              <input type="file" id="p-foto-input" accept="image/*" />
+            </div>
+            <div class="msg" id="p-foto-msg"></div>
+          </div>
           <div>
             <label for="p-nombre">Nombre</label>
             <input type="text" id="p-nombre" required value="${m.nombre ?? ''}" />
@@ -165,6 +173,46 @@ export async function initProfile(session) {
 
   content.innerHTML = formHtml(member);
   renderIdiomasTags();
+
+  document.getElementById('p-foto-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fotoMsg = document.getElementById('p-foto-msg');
+    fotoMsg.className = 'msg show';
+    fotoMsg.textContent = 'Subiendo foto…';
+
+    const ext = file.name.split('.').pop();
+    const path = `${session.user.id}/foto.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('fotos')
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      fotoMsg.className = 'msg show error';
+      fotoMsg.textContent = 'No se pudo subir la foto: ' + uploadError.message;
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('fotos').getPublicUrl(path);
+    const fotoUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
+
+    const { error: saveError } = await supabase.from('members').update({ foto_url: fotoUrl }).eq('email', email);
+
+    if (saveError) {
+      fotoMsg.className = 'msg show error';
+      fotoMsg.textContent = 'La foto se subió pero no se pudo guardar: ' + saveError.message;
+      return;
+    }
+
+    const preview = document.getElementById('p-foto-preview');
+    preview.src = fotoUrl;
+    preview.style.display = '';
+
+    fotoMsg.className = 'msg show ok';
+    fotoMsg.textContent = 'Foto actualizada.';
+  });
 
   document.getElementById('p-idioma-add').addEventListener('click', () => {
     const nombreInput = document.getElementById('p-idioma-nombre');
