@@ -172,7 +172,7 @@ export async function initProfile(session) {
     const idioma = nombreInput.value.trim();
     const nivel = nivelInput.value.trim();
     if (!idioma) return;
-    idiomasList.push(nivel ? { idioma, nivel } : { idioma });
+    idiomasList.push(nivel ? { n: idioma, nivel } : { n: idioma });
     nombreInput.value = '';
     nivelInput.value = '';
     renderIdiomasTags();

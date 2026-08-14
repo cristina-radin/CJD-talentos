@@ -1,33 +1,57 @@
-<title>Bolsa de Talentos CJD</title>
-<link rel="stylesheet" href="css/style.css" />
-
-<header class="app-header">
-  <div class="brand">Bolsa de Talentos · CJD</div>
-  <nav class="main-tabs">
-    <button type="button" class="tab-view-btn active" data-view="search">Buscar</button>
-    <button type="button" class="tab-view-btn" data-view="profile">Mi ficha</button>
-    <button type="button" class="tab-view-btn" id="tab-admin-btn" data-view="admin" hidden>Admin</button>
-  </nav>
-  <div class="user-box">
-    <span id="user-email"></span>
-    <button type="button" class="btn secondary" id="logout-btn">Salir</button>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bolsa de Talentos · Carmelo Joven Descalzo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="logo-watermark" aria-hidden="true">
+    <img src="assets/logo.png" alt="" onerror="this.parentElement.style.display='none'" />
   </div>
-</header>
 
-<main class="app-main">
-  <section class="view active" id="view-search">
-    <div class="filters" id="search-filters"></div>
-    <div class="count-line" id="search-count"></div>
-    <div class="results-grid" id="search-results"></div>
-  </section>
+  <header class="app-header">
+    <div class="brand-lockup brand-lockup-header">
+      <img class="brand-logo" src="assets/logo.png" alt="" onerror="this.style.display='none'" />
+      <div>
+        <h1 class="brand-title">Carmelo Joven Descalzo</h1>
+        <p class="brand-subtitle">Bolsa de Talentos</p>
+      </div>
+    </div>
+    <nav class="main-tabs">
+      <button type="button" class="tab-view-btn active" data-view="search">Buscar</button>
+      <button type="button" class="tab-view-btn" data-view="profile">Mi ficha</button>
+      <button type="button" class="tab-view-btn" id="tab-admin-btn" data-view="admin" hidden>Admin</button>
+    </nav>
+    <div class="user-box">
+      <span id="user-email"></span>
+      <button type="button" class="btn secondary" id="logout-btn">Salir</button>
+    </div>
+  </header>
 
-  <section class="view" id="view-profile">
-    <div id="profile-content"></div>
-  </section>
+  <main class="app-main">
+    <section class="view active" id="view-search">
+      <div class="filters" id="search-filters"></div>
+      <div class="count-line" id="search-count"></div>
+      <div class="results-grid" id="search-results"></div>
+    </section>
 
-  <section class="view" id="view-admin">
-    <div id="admin-content"></div>
-  </section>
-</main>
+    <section class="view" id="view-profile">
+      <div id="profile-content"></div>
+    </section>
 
-<script type="module" src="js/app.js"></script>
+    <section class="view" id="view-admin">
+      <div id="admin-content"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

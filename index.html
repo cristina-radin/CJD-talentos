@@ -1,53 +1,76 @@
-<title>Bolsa de Talentos CJD</title>
-<link rel="stylesheet" href="css/style.css" />
-
-<div class="center-screen">
-  <div class="card auth-card">
-    <h1>Bolsa de Talentos</h1>
-    <p class="subtitle">Carmelo Joven Descalzo</p>
-
-    <div class="tabs">
-      <button type="button" class="tab-btn active" id="tab-login-btn">Iniciar sesión</button>
-      <button type="button" class="tab-btn" id="tab-signup-btn">Crear cuenta</button>
-    </div>
-
-    <form id="login-form">
-      <div>
-        <label for="login-email">Email</label>
-        <input type="email" id="login-email" required autocomplete="email" />
-      </div>
-      <div>
-        <label for="login-password">Contraseña</label>
-        <input type="password" id="login-password" required autocomplete="current-password" />
-      </div>
-      <div class="msg" id="login-msg"></div>
-      <button type="submit" class="btn" id="login-submit">Entrar</button>
-    </form>
-
-    <form id="signup-form" style="display:none">
-      <div>
-        <label for="signup-email">Email</label>
-        <input type="email" id="signup-email" required autocomplete="email" />
-      </div>
-      <p style="font-size:0.8rem;color:var(--text-muted);margin:-6px 0 0">
-        Usa el mismo email con el que apareces en la bolsa de talentos.
-      </p>
-      <div>
-        <label for="signup-password">Contraseña</label>
-        <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
-      </div>
-      <div>
-        <label for="signup-password2">Repite la contraseña</label>
-        <input type="password" id="signup-password2" required minlength="6" autocomplete="new-password" />
-      </div>
-      <div>
-        <label for="signup-group-password">Clave de grupo</label>
-        <input type="password" id="signup-group-password" required autocomplete="off" />
-      </div>
-      <div class="msg" id="signup-msg"></div>
-      <button type="submit" class="btn" id="signup-submit">Crear cuenta</button>
-    </form>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bolsa de Talentos · Carmelo Joven Descalzo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="logo-watermark" aria-hidden="true">
+    <img src="assets/logo.png" alt="" onerror="this.parentElement.style.display='none'" />
   </div>
-</div>
 
-<script type="module" src="js/login.js"></script>
+  <div class="center-screen">
+    <div class="card auth-card">
+      <div class="brand-lockup">
+        <img class="brand-logo" src="assets/logo.png" alt="" onerror="this.style.display='none'" />
+        <div>
+          <h1 class="brand-title">Carmelo Joven Descalzo</h1>
+          <p class="brand-subtitle">Bolsa de Talentos</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="tab-login-btn">Iniciar sesión</button>
+        <button type="button" class="tab-btn" id="tab-signup-btn">Crear cuenta</button>
+      </div>
+
+      <form id="login-form">
+        <div>
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" required autocomplete="email" />
+        </div>
+        <div>
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" required autocomplete="current-password" />
+        </div>
+        <div class="msg" id="login-msg"></div>
+        <button type="submit" class="btn" id="login-submit">Entrar</button>
+      </form>
+
+      <form id="signup-form" style="display:none">
+        <div>
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" required autocomplete="email" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin:-6px 0 0">
+          Usa el mismo email con el que apareces en la bolsa de talentos.
+        </p>
+        <div>
+          <label for="signup-password">Contraseña</label>
+          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
+        </div>
+        <div>
+          <label for="signup-password2">Repite la contraseña</label>
+          <input type="password" id="signup-password2" required minlength="6" autocomplete="new-password" />
+        </div>
+        <div>
+          <label for="signup-group-password">Clave de grupo</label>
+          <input type="password" id="signup-group-password" required autocomplete="off" />
+        </div>
+        <div class="msg" id="signup-msg"></div>
+        <button type="submit" class="btn" id="signup-submit">Crear cuenta</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>
