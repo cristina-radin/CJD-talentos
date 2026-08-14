@@ -4,6 +4,14 @@ import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from 
 let allMembers = [];
 let dialogEl = null;
 
+function formatDate(value) {
+  if (!value) return '';
+  return new Date(value).toLocaleString('es-ES', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
 const SENSITIVE_COLUMNS = [
   { key: 'telefono', label: 'Teléfono' },
   { key: 'nif', label: 'NIF' },
@@ -167,14 +175,11 @@ function applyFilters() {
   });
 }
 
-export async function initAdmin() {
-  const content = document.getElementById('admin-content');
-  content.innerHTML = '<p class="empty-state">Cargando…</p>';
-
+async function renderFichasPanel(panel) {
   const { data, error } = await supabase.from('members').select('*').order('apellidos');
 
   if (error) {
-    content.innerHTML = `<div class="empty-state">Error al cargar: ${error.message}</div>`;
+    panel.innerHTML = `<div class="empty-state">Error al cargar: ${error.message}</div>`;
     return;
   }
 
@@ -187,7 +192,7 @@ export async function initAdmin() {
     .map((a) => `<option value="${a}">${asociacionLabel(a)}</option>`)
     .join('');
 
-  content.innerHTML = `
+  panel.innerHTML = `
     <div class="filters">
       <div class="field">
         <label for="admin-search">Buscar</label>
@@ -211,4 +216,87 @@ export async function initAdmin() {
   document.getElementById('admin-asociacion').addEventListener('change', applyFilters);
 
   applyFilters();
+}
+
+async function renderSignupsPanel(panel) {
+  panel.innerHTML = '<p class="empty-state">Cargando…</p>';
+
+  const { data, error } = await supabase.rpc('list_signups');
+
+  if (error) {
+    panel.innerHTML = `<div class="empty-state">Error al cargar: ${error.message}</div>`;
+    return;
+  }
+
+  const rows = data ?? [];
+  const sinFicha = rows.filter((r) => !r.tiene_ficha).length;
+
+  if (rows.length === 0) {
+    panel.innerHTML = '<div class="empty-state">Todavía no se ha registrado nadie.</div>';
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="count-line">
+      ${rows.length} cuenta${rows.length === 1 ? '' : 's'} registrada${rows.length === 1 ? '' : 's'}
+      ${sinFicha ? ` · <strong>${sinFicha} sin ficha</strong>` : ''}
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Registrado</th>
+            <th>Email confirmado</th>
+            <th>Tiene ficha</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows
+            .map(
+              (r) => `
+            <tr>
+              <td>${r.email ?? ''}</td>
+              <td>${formatDate(r.created_at)}</td>
+              <td>${r.confirmado ? 'Sí' : 'No'}</td>
+              <td class="${r.tiene_ficha ? '' : 'sensitive'}">${r.tiene_ficha ? 'Sí' : 'No'}</td>
+            </tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+export async function initAdmin() {
+  const content = document.getElementById('admin-content');
+  content.innerHTML = `
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-subview="fichas">Fichas</button>
+      <button type="button" class="tab-btn" data-subview="signups">Cuentas registradas</button>
+    </div>
+    <div id="admin-panel-fichas"></div>
+    <div id="admin-panel-signups" style="display:none"></div>
+  `;
+
+  const panelFichas = document.getElementById('admin-panel-fichas');
+  const panelSignups = document.getElementById('admin-panel-signups');
+  const subtabButtons = content.querySelectorAll('.tab-btn');
+
+  subtabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      subtabButtons.forEach((b) => b.classList.toggle('active', b === btn));
+      const showFichas = btn.dataset.subview === 'fichas';
+      panelFichas.style.display = showFichas ? '' : 'none';
+      panelSignups.style.display = showFichas ? 'none' : '';
+      if (!showFichas && !panelSignups.dataset.loaded) {
+        panelSignups.dataset.loaded = 'true';
+        renderSignupsPanel(panelSignups);
+      }
+    });
+  });
+
+  panelFichas.innerHTML = '<p class="empty-state">Cargando…</p>';
+  await renderFichasPanel(panelFichas);
 }
