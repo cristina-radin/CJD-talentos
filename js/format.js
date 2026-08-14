@@ -1,4 +1,4 @@
-import { ESTILOS_LABELS } from './config.js';
+import { ESTILOS_LABELS, ASOCIACION_LABELS } from './config.js';
 
 // "CON COCHE" -> "Con coche"
 export function toSentenceCase(str) {
@@ -9,6 +9,10 @@ export function toSentenceCase(str) {
 
 export function estiloLabel(estilo) {
   return ESTILOS_LABELS[estilo] ?? toSentenceCase(estilo);
+}
+
+export function asociacionLabel(asociacion) {
+  return ASOCIACION_LABELS[asociacion] ?? toSentenceCase(asociacion);
 }
 
 // `idiomas` es JSONB y puede venir como string suelto ("Inglés") o como

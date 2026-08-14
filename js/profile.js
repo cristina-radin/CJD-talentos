@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS } from './config.js';
-import { estiloLabel, formatIdiomaEntry } from './format.js';
+import { ESTILOS, ASOCIACIONES } from './config.js';
+import { estiloLabel, formatIdiomaEntry, asociacionLabel } from './format.js';
 
 let idiomasList = [];
 
@@ -33,6 +33,10 @@ function formHtml(m) {
       </label>`
   ).join('');
 
+  const asociacionOptions = ASOCIACIONES.map(
+    (a) => `<option value="${a}" ${m.asociacion === a ? 'selected' : ''}>${asociacionLabel(a)}</option>`
+  ).join('');
+
   return `
     <form id="profile-form">
       <fieldset>
@@ -53,6 +57,13 @@ function formHtml(m) {
           <div>
             <label for="p-coche">Coche</label>
             <input type="text" id="p-coche" value="${m.coche ?? ''}" />
+          </div>
+          <div>
+            <label for="p-asociacion">Asociación</label>
+            <select id="p-asociacion">
+              <option value="">Sin especificar</option>
+              ${asociacionOptions}
+            </select>
           </div>
           <div>
             <label for="p-area">Área de titulación</label>
@@ -179,6 +190,7 @@ export async function initProfile(session) {
       apellidos: document.getElementById('p-apellidos').value.trim(),
       ciudad: document.getElementById('p-ciudad').value.trim() || null,
       coche: document.getElementById('p-coche').value.trim() || null,
+      asociacion: document.getElementById('p-asociacion').value || null,
       area_titulacion: document.getElementById('p-area').value.trim() || null,
       titulacion: document.getElementById('p-titulacion').value.trim() || null,
       experiencia: document.getElementById('p-experiencia').value.trim() || null,

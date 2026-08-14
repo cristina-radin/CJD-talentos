@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS } from './config.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase } from './format.js';
+import { ESTILOS, ASOCIACIONES } from './config.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
 
 let allMembers = [];
 const activeEstilos = new Set();
@@ -47,6 +47,12 @@ function renderFilters() {
     distinctValues(allMembers, 'coche'),
     toSentenceCase
   );
+  const { wrap: asociacionWrap, select: asociacionSelect } = buildSelect(
+    'f-asociacion',
+    'Asociación',
+    ASOCIACIONES,
+    asociacionLabel
+  );
 
   const idiomaWrap = document.createElement('div');
   idiomaWrap.className = 'field';
@@ -77,10 +83,11 @@ function renderFilters() {
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
   filtersEl.appendChild(cocheWrap);
+  filtersEl.appendChild(asociacionWrap);
   filtersEl.appendChild(idiomaWrap);
   filtersEl.appendChild(estilosWrap);
 
-  [ciudadSelect, areaSelect, cocheSelect].forEach((sel) =>
+  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect].forEach((sel) =>
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
@@ -90,12 +97,14 @@ function applyFilters() {
   const ciudad = document.getElementById('f-ciudad').value;
   const area = document.getElementById('f-area').value;
   const coche = document.getElementById('f-coche').value;
+  const asociacion = document.getElementById('f-asociacion').value;
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
 
   const filtered = allMembers.filter((m) => {
     if (ciudad && m.ciudad !== ciudad) return false;
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
+    if (asociacion && m.asociacion !== asociacion) return false;
 
     if (idioma) {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
@@ -131,7 +140,7 @@ function renderResults(members) {
         <div class="member-card">
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
           <div class="meta">
-            ${[m.ciudad, m.titulacion, m.area_titulacion].filter(Boolean).join(' · ')}
+            ${[m.ciudad, m.titulacion, m.area_titulacion, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ')}
           </div>
           ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
           ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}

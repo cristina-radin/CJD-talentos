@@ -15,3 +15,13 @@ export const ESTILOS_LABELS = {
   'LOGICO-MATEMATICO': 'Lógico-matemático',
   ORGANIZADO: 'Organizado',
 };
+
+// Asociación regional. Igual que ESTILOS: el valor se guarda tal cual en la
+// base de datos, la etiqueta es solo para mostrar.
+export const ASOCIACIONES = ['LEVANTE', 'ANDALUCIA', 'MADRID'];
+
+export const ASOCIACION_LABELS = {
+  LEVANTE: 'Levante',
+  ANDALUCIA: 'Andalucía',
+  MADRID: 'Madrid',
+};

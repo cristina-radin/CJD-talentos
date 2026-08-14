@@ -297,33 +297,60 @@ fieldset legend {
 
 fieldset.sensitive legend { color: var(--danger); }
 
-ul.admin-name-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
-}
-
-.admin-name-btn {
-  width: 100%;
-  text-align: left;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.admin-name-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
 .form-grid p { margin: 0; }
+
+.table-wrap { overflow-x: auto; }
+
+table.admin-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+  background: var(--surface);
+}
+
+table.admin-table th, table.admin-table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+table.admin-table th { background: var(--bg); position: sticky; top: 0; }
+
+table.admin-table td.sensitive { background: var(--danger-bg); }
+
+.admin-name-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+dialog.member-dialog {
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  max-width: 640px;
+  width: 92%;
+}
+
+dialog.member-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.member-dialog-close {
+  float: right;
+}
+
+.member-dialog-body {
+  clear: both;
+  padding-top: 8px;
+}
 
 .empty-state {
   color: var(--text-muted);

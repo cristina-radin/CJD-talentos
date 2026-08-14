@@ -1,9 +1,24 @@
 import { supabase } from './supabaseClient.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase } from './format.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
 
 let allMembers = [];
+let dialogEl = null;
 
-function matchesQuery(row, q) {
+const SENSITIVE_COLUMNS = [
+  { key: 'telefono', label: 'Teléfono' },
+  { key: 'nif', label: 'NIF' },
+  { key: 'domicilio', label: 'Domicilio' },
+  { key: 'nacimiento', label: 'Nacimiento' },
+  { key: 'alergias', label: 'Alergias' },
+];
+
+function distinctValues(rows, field) {
+  return [...new Set(rows.map((r) => r[field]).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, 'es')
+  );
+}
+
+function matchesText(row, q) {
   const haystack = [
     row.nombre,
     row.apellidos,
@@ -14,6 +29,10 @@ function matchesQuery(row, q) {
     row.coche,
     row.experiencia,
     row.hobbies,
+    row.telefono,
+    row.nif,
+    row.domicilio,
+    row.alergias,
     ...(Array.isArray(row.estilos) ? row.estilos : []),
     ...(Array.isArray(row.idiomas) ? row.idiomas.map(formatIdiomaEntry) : []),
   ]
@@ -33,14 +52,14 @@ function renderDetail(row) {
   const idiomas = Array.isArray(row.idiomas) ? row.idiomas : [];
 
   return `
-    <button type="button" class="btn secondary" id="admin-back-btn">← Volver a la lista</button>
-    <h2 style="margin:16px 0 4px">${row.nombre ?? ''} ${row.apellidos ?? ''}</h2>
+    <h2 style="margin:0 0 4px">${row.nombre ?? ''} ${row.apellidos ?? ''}</h2>
     <p class="count-line">${row.email ?? ''}</p>
 
     <fieldset>
       <legend>Datos del directorio</legend>
       <div class="form-grid">
         ${detailField('Ciudad', row.ciudad)}
+        ${detailField('Asociación', row.asociacion ? asociacionLabel(row.asociacion) : '')}
         ${detailField('Área de titulación', row.area_titulacion)}
         ${detailField('Titulación', row.titulacion)}
         ${detailField('Coche', row.coche ? toSentenceCase(row.coche) : '')}
@@ -72,56 +91,78 @@ function renderDetail(row) {
   `;
 }
 
-function renderList(rows) {
-  if (rows.length === 0) {
-    return '<div class="empty-state">Nadie coincide con la búsqueda.</div>';
-  }
-  return `
-    <ul class="admin-name-list">
-      ${rows
-        .map(
-          (row) => `
-        <li>
-          <button type="button" class="admin-name-btn" data-id="${row.id}">
-            ${row.apellidos ?? ''}, ${row.nombre ?? ''}
-          </button>
-        </li>`
-        )
-        .join('')}
-    </ul>
+function ensureDialog() {
+  if (dialogEl) return dialogEl;
+  dialogEl = document.createElement('dialog');
+  dialogEl.className = 'member-dialog';
+  dialogEl.innerHTML = `
+    <button type="button" class="btn secondary member-dialog-close">Cerrar</button>
+    <div class="member-dialog-body"></div>
   `;
+  document.body.appendChild(dialogEl);
+  dialogEl.querySelector('.member-dialog-close').addEventListener('click', () => dialogEl.close());
+  dialogEl.addEventListener('click', (e) => {
+    if (e.target === dialogEl) dialogEl.close();
+  });
+  return dialogEl;
 }
 
-function showListView(content, rows) {
-  content.innerHTML = `
-    <div class="field" style="max-width:280px;margin-bottom:14px">
-      <label for="admin-search">Buscar</label>
-      <input type="text" id="admin-search" placeholder="Nombre, ciudad, idioma…" />
-    </div>
-    <div class="count-line" id="admin-count">${rows.length} fichas</div>
-    <div id="admin-list-box">${renderList(rows)}</div>
-  `;
+function openDetail(row) {
+  const dialog = ensureDialog();
+  dialog.querySelector('.member-dialog-body').innerHTML = renderDetail(row);
+  dialog.showModal();
+}
 
-  document.getElementById('admin-search').addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    const filtered = !q ? rows : rows.filter((row) => matchesQuery(row, q));
-    document.getElementById('admin-count').textContent = `${filtered.length} fichas`;
-    document.getElementById('admin-list-box').innerHTML = renderList(filtered);
-    attachListHandlers(content, rows);
+function renderTable(rows) {
+  if (rows.length === 0) {
+    return '<div class="empty-state">Nadie coincide con estos filtros.</div>';
+  }
+  const head = `
+    <tr>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Asociación</th>
+      ${SENSITIVE_COLUMNS.map((c) => `<th>${c.label}</th>`).join('')}
+    </tr>`;
+  const body = rows
+    .map(
+      (row) => `
+    <tr>
+      <td><button type="button" class="admin-name-link" data-id="${row.id}">${row.apellidos ?? ''}, ${row.nombre ?? ''}</button></td>
+      <td>${row.email ?? ''}</td>
+      <td>${row.asociacion ? asociacionLabel(row.asociacion) : ''}</td>
+      ${SENSITIVE_COLUMNS.map((c) => `<td class="sensitive">${row[c.key] ?? ''}</td>`).join('')}
+    </tr>`
+    )
+    .join('');
+  return `
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>${head}</thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>`;
+}
+
+function applyFilters() {
+  const q = document.getElementById('admin-search').value.trim().toLowerCase();
+  const ciudad = document.getElementById('admin-ciudad').value;
+  const asociacion = document.getElementById('admin-asociacion').value;
+
+  const filtered = allMembers.filter((row) => {
+    if (ciudad && row.ciudad !== ciudad) return false;
+    if (asociacion && row.asociacion !== asociacion) return false;
+    if (q && !matchesText(row, q)) return false;
+    return true;
   });
 
-  attachListHandlers(content, rows);
-}
+  document.getElementById('admin-table-box').innerHTML = renderTable(filtered);
+  document.getElementById('admin-count').textContent = `${filtered.length} fichas`;
 
-function attachListHandlers(content, rows) {
-  content.querySelectorAll('.admin-name-btn').forEach((btn) => {
+  document.querySelectorAll('.admin-name-link').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const row = rows.find((r) => r.id === btn.dataset.id);
-      if (!row) return;
-      content.innerHTML = renderDetail(row);
-      document.getElementById('admin-back-btn').addEventListener('click', () => {
-        showListView(content, rows);
-      });
+      const row = allMembers.find((r) => r.id === btn.dataset.id);
+      if (row) openDetail(row);
     });
   });
 }
@@ -138,5 +179,36 @@ export async function initAdmin() {
   }
 
   allMembers = data ?? [];
-  showListView(content, allMembers);
+
+  const ciudadOptions = distinctValues(allMembers, 'ciudad')
+    .map((c) => `<option value="${c}">${c}</option>`)
+    .join('');
+  const asociacionOptions = distinctValues(allMembers, 'asociacion')
+    .map((a) => `<option value="${a}">${asociacionLabel(a)}</option>`)
+    .join('');
+
+  content.innerHTML = `
+    <div class="filters">
+      <div class="field">
+        <label for="admin-search">Buscar</label>
+        <input type="text" id="admin-search" placeholder="Nombre, ciudad, idioma…" />
+      </div>
+      <div class="field">
+        <label for="admin-ciudad">Ciudad</label>
+        <select id="admin-ciudad"><option value="">Todas</option>${ciudadOptions}</select>
+      </div>
+      <div class="field">
+        <label for="admin-asociacion">Asociación</label>
+        <select id="admin-asociacion"><option value="">Todas</option>${asociacionOptions}</select>
+      </div>
+    </div>
+    <div id="admin-table-box"></div>
+    <div class="count-line" id="admin-count"></div>
+  `;
+
+  document.getElementById('admin-search').addEventListener('input', applyFilters);
+  document.getElementById('admin-ciudad').addEventListener('change', applyFilters);
+  document.getElementById('admin-asociacion').addEventListener('change', applyFilters);
+
+  applyFilters();
 }
