@@ -25,3 +25,7 @@ export const ASOCIACION_LABELS = {
   ANDALUCIA: 'Andalucía',
   MADRID: 'Madrid',
 };
+
+// Niveles fijos de idioma, para que el filtro de búsqueda pueda comparar
+// niveles de forma fiable en vez de depender de texto libre.
+export const NIVELES_IDIOMA = ['Básico', 'Intermedio', 'Avanzado'];

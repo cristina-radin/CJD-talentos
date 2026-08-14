@@ -160,7 +160,7 @@ function renderResults(members) {
 }
 
 export async function initSearch() {
-  const { data, error } = await supabase.from('members_public').select('*');
+  const { data, error } = await supabase.rpc('get_directory');
 
   if (error) {
     document.getElementById('search-results').innerHTML =

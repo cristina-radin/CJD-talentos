@@ -1,8 +1,56 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES } from './config.js';
-import { estiloLabel, formatIdiomaEntry, asociacionLabel } from './format.js';
+import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA } from './config.js';
+import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
+
+// Campo "combo": desplegable con los valores ya existentes en la base de
+// datos + una opción "Otra…" que revela un campo de texto libre. Evita que
+// cada quien escriba la misma ciudad/coche/área de formas distintas
+// (acentos, mayúsculas, erratas) mientras sigue permitiendo dar de alta
+// valores nuevos que aún no existan.
+function comboFieldHtml(id, labelText, options, currentValue, { labelFn = (v) => v, multiline = false, wrapClass = '' } = {}) {
+  const isKnown = currentValue && options.includes(currentValue);
+  const isOtro = Boolean(currentValue) && !isKnown;
+  const optsHtml = options
+    .map((v) => `<option value="${v}" ${currentValue === v ? 'selected' : ''}>${labelFn(v)}</option>`)
+    .join('');
+  const otroTag = multiline
+    ? `<textarea id="${id}-otro" placeholder="Escribe el valor" style="margin-top:6px; ${isOtro ? '' : 'display:none'}">${isOtro ? currentValue : ''}</textarea>`
+    : `<input type="text" id="${id}-otro" placeholder="Escribe el valor" value="${isOtro ? currentValue : ''}" style="margin-top:6px; ${isOtro ? '' : 'display:none'}" />`;
+
+  return `
+    <div class="${wrapClass}">
+      <label for="${id}">${labelText}</label>
+      <select id="${id}">
+        <option value="">Sin especificar</option>
+        ${optsHtml}
+        <option value="__otro__" ${isOtro ? 'selected' : ''}>Otra… (escribir)</option>
+      </select>
+      ${otroTag}
+    </div>
+  `;
+}
+
+function wireComboField(id) {
+  const select = document.getElementById(id);
+  const otro = document.getElementById(`${id}-otro`);
+  select.addEventListener('change', () => {
+    const showOtro = select.value === '__otro__';
+    otro.style.display = showOtro ? '' : 'none';
+    if (showOtro) otro.focus();
+  });
+}
+
+function comboFieldValue(id) {
+  const select = document.getElementById(id);
+  if (select.value === '__otro__') {
+    return document.getElementById(`${id}-otro`).value.trim() || null;
+  }
+  return select.value || null;
+}
+
+const ALERGIAS_RAPIDAS = ['Ninguna', 'Ninguna conocida'];
 
 function renderIdiomasTags() {
   const box = document.getElementById('p-idiomas-tags');
@@ -23,7 +71,7 @@ function renderIdiomasTags() {
   });
 }
 
-function formHtml(m) {
+function formHtml(m, options) {
   const estilosActuales = Array.isArray(m.estilos) ? m.estilos : [];
   const estilosHtml = ESTILOS.map(
     (estilo) => `
@@ -58,14 +106,8 @@ function formHtml(m) {
             <label for="p-apellidos">Apellidos</label>
             <input type="text" id="p-apellidos" required value="${m.apellidos ?? ''}" />
           </div>
-          <div>
-            <label for="p-ciudad">Ciudad</label>
-            <input type="text" id="p-ciudad" value="${m.ciudad ?? ''}" />
-          </div>
-          <div>
-            <label for="p-coche">Coche</label>
-            <input type="text" id="p-coche" value="${m.coche ?? ''}" />
-          </div>
+          ${comboFieldHtml('p-ciudad', 'Ciudad', options.ciudad, m.ciudad)}
+          ${comboFieldHtml('p-coche', 'Coche', options.coche, m.coche, { labelFn: toSentenceCase })}
           <div>
             <label for="p-asociacion">Asociación</label>
             <select id="p-asociacion">
@@ -73,14 +115,8 @@ function formHtml(m) {
               ${asociacionOptions}
             </select>
           </div>
-          <div>
-            <label for="p-area">Área de titulación</label>
-            <input type="text" id="p-area" value="${m.area_titulacion ?? ''}" />
-          </div>
-          <div>
-            <label for="p-titulacion">Titulación</label>
-            <input type="text" id="p-titulacion" value="${m.titulacion ?? ''}" />
-          </div>
+          ${comboFieldHtml('p-area', 'Área de titulación', options.area_titulacion, m.area_titulacion)}
+          ${comboFieldHtml('p-titulacion', 'Titulación', options.titulacion, m.titulacion)}
           <div class="full">
             <label for="p-experiencia">Experiencia</label>
             <textarea id="p-experiencia">${m.experiencia ?? ''}</textarea>
@@ -97,8 +133,16 @@ function formHtml(m) {
             <label>Idiomas</label>
             <div class="tag-list" id="p-idiomas-tags"></div>
             <div class="tag-input-row">
-              <input type="text" id="p-idioma-nombre" placeholder="Idioma, p.ej. Inglés" />
-              <input type="text" id="p-idioma-nivel" placeholder="Nivel, p.ej. Avanzado" />
+              <select id="p-idioma-select">
+                <option value="">Elige idioma…</option>
+                ${options.idiomas.map((n) => `<option value="${n}">${n}</option>`).join('')}
+                <option value="__otro__">Otro… (escribir)</option>
+              </select>
+              <input type="text" id="p-idioma-nombre-otro" placeholder="Escribe el idioma" style="display:none" />
+              <select id="p-idioma-nivel">
+                <option value="">Nivel (opcional)</option>
+                ${NIVELES_IDIOMA.map((n) => `<option value="${n}">${n}</option>`).join('')}
+              </select>
               <button type="button" class="btn secondary" id="p-idioma-add">Añadir</button>
             </div>
           </div>
@@ -118,16 +162,13 @@ function formHtml(m) {
           </div>
           <div>
             <label for="p-nacimiento">Fecha de nacimiento</label>
-            <input type="text" id="p-nacimiento" value="${m.nacimiento ?? ''}" />
+            <input type="date" id="p-nacimiento" value="${m.nacimiento ?? ''}" />
           </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
             <input type="text" id="p-domicilio" value="${m.domicilio ?? ''}" />
           </div>
-          <div class="full">
-            <label for="p-alergias">Alergias</label>
-            <textarea id="p-alergias">${m.alergias ?? ''}</textarea>
-          </div>
+          ${comboFieldHtml('p-alergias', 'Alergias', options.alergias, m.alergias, { multiline: true, wrapClass: 'full' })}
         </div>
       </fieldset>
 
@@ -171,8 +212,44 @@ export async function initProfile(session) {
 
   idiomasList = Array.isArray(member.idiomas) ? [...member.idiomas] : [];
 
-  content.innerHTML = formHtml(member);
+  const [{ data: allMembers }, { data: alergiasExistentes }] = await Promise.all([
+    supabase.rpc('get_directory'),
+    supabase.rpc('get_distinct_alergias'),
+  ]);
+
+  const distinct = (field) =>
+    [...new Set((allMembers ?? []).map((r) => r[field]).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, 'es')
+    );
+
+  const idiomaNombres = [
+    ...new Set(
+      (allMembers ?? [])
+        .flatMap((m) => (Array.isArray(m.idiomas) ? m.idiomas : []))
+        .map((i) => (typeof i === 'object' && i ? i.n : i))
+        .filter(Boolean)
+    ),
+  ].sort((a, b) => a.localeCompare(b, 'es'));
+
+  const options = {
+    ciudad: distinct('ciudad'),
+    area_titulacion: distinct('area_titulacion'),
+    coche: distinct('coche'),
+    titulacion: distinct('titulacion'),
+    idiomas: idiomaNombres,
+    alergias: [...new Set([...ALERGIAS_RAPIDAS, ...(alergiasExistentes ?? [])])],
+  };
+
+  content.innerHTML = formHtml(member, options);
   renderIdiomasTags();
+  ['p-ciudad', 'p-coche', 'p-area', 'p-titulacion', 'p-alergias'].forEach(wireComboField);
+
+  document.getElementById('p-idioma-select').addEventListener('change', (e) => {
+    const otro = document.getElementById('p-idioma-nombre-otro');
+    const showOtro = e.target.value === '__otro__';
+    otro.style.display = showOtro ? '' : 'none';
+    if (showOtro) otro.focus();
+  });
 
   document.getElementById('p-foto-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -215,14 +292,20 @@ export async function initProfile(session) {
   });
 
   document.getElementById('p-idioma-add').addEventListener('click', () => {
-    const nombreInput = document.getElementById('p-idioma-nombre');
-    const nivelInput = document.getElementById('p-idioma-nivel');
-    const idioma = nombreInput.value.trim();
-    const nivel = nivelInput.value.trim();
+    const select = document.getElementById('p-idioma-select');
+    const otroInput = document.getElementById('p-idioma-nombre-otro');
+    const nivelSelect = document.getElementById('p-idioma-nivel');
+
+    const idioma = select.value === '__otro__' ? otroInput.value.trim() : select.value;
+    const nivel = nivelSelect.value;
     if (!idioma) return;
+
     idiomasList.push(nivel ? { n: idioma, nivel } : { n: idioma });
-    nombreInput.value = '';
-    nivelInput.value = '';
+
+    select.value = '';
+    otroInput.value = '';
+    otroInput.style.display = 'none';
+    nivelSelect.value = '';
     renderIdiomasTags();
   });
 
@@ -236,20 +319,20 @@ export async function initProfile(session) {
     const updates = {
       nombre: document.getElementById('p-nombre').value.trim(),
       apellidos: document.getElementById('p-apellidos').value.trim(),
-      ciudad: document.getElementById('p-ciudad').value.trim() || null,
-      coche: document.getElementById('p-coche').value.trim() || null,
+      ciudad: comboFieldValue('p-ciudad'),
+      coche: comboFieldValue('p-coche')?.toUpperCase() || null,
       asociacion: document.getElementById('p-asociacion').value || null,
-      area_titulacion: document.getElementById('p-area').value.trim() || null,
-      titulacion: document.getElementById('p-titulacion').value.trim() || null,
+      area_titulacion: comboFieldValue('p-area'),
+      titulacion: comboFieldValue('p-titulacion'),
       experiencia: document.getElementById('p-experiencia').value.trim() || null,
       hobbies: document.getElementById('p-hobbies').value.trim() || null,
       estilos,
       idiomas: idiomasList,
       telefono: document.getElementById('p-telefono').value.trim() || null,
       nif: document.getElementById('p-nif').value.trim() || null,
-      nacimiento: document.getElementById('p-nacimiento').value.trim() || null,
+      nacimiento: document.getElementById('p-nacimiento').value || null,
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
-      alergias: document.getElementById('p-alergias').value.trim() || null,
+      alergias: comboFieldValue('p-alergias'),
     };
 
     const { error: updateError } = await supabase.from('members').update(updates).eq('email', email);
