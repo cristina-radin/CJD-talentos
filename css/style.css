@@ -313,7 +313,7 @@ section.view.active { display: block; }
   box-shadow: var(--shadow);
 }
 
-.member-card h3 { margin: 0 0 6px; font-size: 1.05rem; padding-right: 56px; }
+.member-card h3 { margin: 0 0 12px; font-size: 1.05rem; padding-right: 56px; }
 
 .member-photo {
   position: absolute;
@@ -375,6 +375,7 @@ dialog.lightbox img {
   font-size: 0.82rem;
   color: var(--text-muted);
   margin-bottom: 8px;
+  padding-right: 56px;
 }
 
 .tag-list {
