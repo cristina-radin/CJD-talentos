@@ -1,15 +1,16 @@
 import { supabase } from './supabaseClient.js';
 import { ESTILOS } from './config.js';
+import { estiloLabel, formatIdiomaEntry } from './format.js';
 
 let idiomasList = [];
 
 function renderIdiomasTags() {
   const box = document.getElementById('p-idiomas-tags');
   box.innerHTML = '';
-  idiomasList.forEach((tag, idx) => {
+  idiomasList.forEach((entry, idx) => {
     const chip = document.createElement('span');
     chip.className = 'tag';
-    chip.textContent = tag;
+    chip.textContent = formatIdiomaEntry(entry);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
@@ -28,7 +29,7 @@ function formHtml(m) {
     (estilo) => `
       <label>
         <input type="checkbox" class="p-estilo" value="${estilo}" ${estilosActuales.includes(estilo) ? 'checked' : ''} />
-        ${estilo}
+        ${estiloLabel(estilo)}
       </label>`
   ).join('');
 
@@ -77,7 +78,8 @@ function formHtml(m) {
             <label>Idiomas</label>
             <div class="tag-list" id="p-idiomas-tags"></div>
             <div class="tag-input-row">
-              <input type="text" id="p-idioma-nuevo" placeholder="p.ej. Inglés (C1)" />
+              <input type="text" id="p-idioma-nombre" placeholder="Idioma, p.ej. Inglés" />
+              <input type="text" id="p-idioma-nivel" placeholder="Nivel, p.ej. Avanzado" />
               <button type="button" class="btn secondary" id="p-idioma-add">Añadir</button>
             </div>
           </div>
@@ -154,11 +156,14 @@ export async function initProfile(session) {
   renderIdiomasTags();
 
   document.getElementById('p-idioma-add').addEventListener('click', () => {
-    const input = document.getElementById('p-idioma-nuevo');
-    const value = input.value.trim();
-    if (!value) return;
-    idiomasList.push(value);
-    input.value = '';
+    const nombreInput = document.getElementById('p-idioma-nombre');
+    const nivelInput = document.getElementById('p-idioma-nivel');
+    const idioma = nombreInput.value.trim();
+    const nivel = nivelInput.value.trim();
+    if (!idioma) return;
+    idiomasList.push(nivel ? { idioma, nivel } : { idioma });
+    nombreInput.value = '';
+    nivelInput.value = '';
     renderIdiomasTags();
   });
 

@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient.js';
 import { ESTILOS } from './config.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase } from './format.js';
 
 let allMembers = [];
 const activeEstilos = new Set();
@@ -10,7 +11,7 @@ function distinctValues(rows, field) {
   );
 }
 
-function buildSelect(id, labelText, values) {
+function buildSelect(id, labelText, values, labelFn = (v) => v) {
   const wrap = document.createElement('div');
   wrap.className = 'field';
   const label = document.createElement('label');
@@ -20,7 +21,7 @@ function buildSelect(id, labelText, values) {
   select.id = id;
   select.innerHTML =
     `<option value="">Todas</option>` +
-    values.map((v) => `<option value="${v}">${v}</option>`).join('');
+    values.map((v) => `<option value="${v}">${labelFn(v)}</option>`).join('');
   wrap.appendChild(label);
   wrap.appendChild(select);
   return { wrap, select };
@@ -43,7 +44,8 @@ function renderFilters() {
   const { wrap: cocheWrap, select: cocheSelect } = buildSelect(
     'f-coche',
     'Coche',
-    distinctValues(allMembers, 'coche')
+    distinctValues(allMembers, 'coche'),
+    toSentenceCase
   );
 
   const idiomaWrap = document.createElement('div');
@@ -62,7 +64,7 @@ function renderFilters() {
   ESTILOS.forEach((estilo) => {
     const id = 'estilo-' + estilo;
     const lbl = document.createElement('label');
-    lbl.innerHTML = `<input type="checkbox" id="${id}" value="${estilo}" /> ${estilo}`;
+    lbl.innerHTML = `<input type="checkbox" id="${id}" value="${estilo}" /> ${estiloLabel(estilo)}`;
     lbl.querySelector('input').addEventListener('change', (e) => {
       if (e.target.checked) activeEstilos.add(estilo);
       else activeEstilos.delete(estilo);
@@ -97,7 +99,7 @@ function applyFilters() {
 
     if (idioma) {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
-      if (!idiomas.some((i) => String(i).toLowerCase().includes(idioma))) return false;
+      if (!idiomas.some((i) => formatIdiomaEntry(i).toLowerCase().includes(idioma))) return false;
     }
 
     if (activeEstilos.size > 0) {
@@ -131,9 +133,9 @@ function renderResults(members) {
           <div class="meta">
             ${[m.ciudad, m.titulacion, m.area_titulacion].filter(Boolean).join(' · ')}
           </div>
-          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${e}</span>`).join('')}</div>` : ''}
-          ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${i}</span>`).join('')}</div>` : ''}
-          ${m.coche ? `<div class="meta">Coche: ${m.coche}</div>` : ''}
+          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+          ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
+          ${m.coche ? `<div class="meta">Coche: ${toSentenceCase(m.coche)}</div>` : ''}
           ${m.experiencia ? `<p>${m.experiencia}</p>` : ''}
           ${m.hobbies ? `<p><em>${m.hobbies}</em></p>` : ''}
         </div>

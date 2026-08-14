@@ -269,9 +269,10 @@ section.view.active { display: block; }
 .tag-input-row {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
-.tag-input-row input { flex: 1; }
+.tag-input-row input { flex: 1; min-width: 120px; }
 
 .form-grid {
   display: grid;
@@ -296,25 +297,33 @@ fieldset legend {
 
 fieldset.sensitive legend { color: var(--danger); }
 
-.table-wrap { overflow-x: auto; }
+ul.admin-name-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
 
-table.admin-table {
-  border-collapse: collapse;
+.admin-name-btn {
   width: 100%;
-  font-size: 0.85rem;
-  background: var(--surface);
-}
-
-table.admin-table th, table.admin-table td {
-  border: 1px solid var(--border);
-  padding: 6px 8px;
   text-align: left;
-  white-space: nowrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
 }
 
-table.admin-table th { background: var(--bg); position: sticky; top: 0; }
+.admin-name-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
 
-table.admin-table td.sensitive { background: var(--danger-bg); }
+.form-grid p { margin: 0; }
 
 .empty-state {
   color: var(--text-muted);

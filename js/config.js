@@ -5,4 +5,13 @@ export const SUPABASE_URL = 'https://wramkbrxxgtauosvhynt.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_K07kJgH4bRwsD6FeYH95RA_FCW0AMiF';
 
 // Los 4 estilos de pensamiento fijos usados en el formulario y en la búsqueda.
+// El valor (clave del objeto) es el que se guarda en la base de datos tal cual;
+// la etiqueta es solo para mostrar.
 export const ESTILOS = ['CREATIVO', 'EMPATICO', 'LOGICO-MATEMATICO', 'ORGANIZADO'];
+
+export const ESTILOS_LABELS = {
+  CREATIVO: 'Creativo',
+  EMPATICO: 'Empático',
+  'LOGICO-MATEMATICO': 'Lógico-matemático',
+  ORGANIZADO: 'Organizado',
+};
