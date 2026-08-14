@@ -1,34 +1,41 @@
 # CJD-talentos
 
-Bolsa de talentos interna de Carmelo Joven Descalzo: directorio buscable de
-miembros (formación, idiomas, hobbies…) conectado a Supabase, sin frameworks,
-pensado para desplegarse en GitHub Pages.
+Internal talent directory for Carmelo Joven Descalzo: a searchable directory
+of members (education, languages, hobbies…) backed by Supabase, no build
+step, deployed on GitHub Pages.
 
-## Estructura
+The app itself is in Spanish (its audience is a Spanish-speaking group);
+this README and commit history are in English.
+
+## Structure
 
 ```
-index.html      Login + registro (Supabase Auth)
-app.html        App principal: Buscar / Mi ficha / Admin
-css/style.css   Estilos
-js/config.js    URL y clave pública de Supabase, lista de estilos fijos
-js/supabaseClient.js  Cliente de supabase-js
-js/auth.js      Helpers de sesión, logout y comprobación de admin
-js/login.js     Lógica de index.html
-js/app.js       Coordinador de app.html (pestañas)
-js/search.js    Vista "Buscar" sobre members_public
-js/profile.js   Vista "Mi ficha" sobre members (propia fila)
-js/admin.js     Vista "Admin" sobre members (tabla completa)
+index.html            Login + sign-up (Supabase Auth)
+app.html               Main app shell: Search / My profile / Admin
+css/style.css           Styles (brand colors, fonts, layout)
+js/config.js            Supabase URL/key, fixed option lists (estilos, asociaciones, niveles)
+js/supabaseClient.js    supabase-js client (session stored in sessionStorage, cleared on tab close)
+js/auth.js              Session helpers, logout, admin check
+js/format.js            Display formatting (idiomas, estilos, coche, asociación)
+js/lightbox.js          Shared click-to-enlarge photo viewer
+js/login.js             Logic for index.html
+js/app.js               Coordinator for app.html (tab switching)
+js/search.js            "Search" view, reads via the get_directory() RPC
+js/profile.js           "My profile" view, edits the user's own members row
+js/admin.js             "Admin" view: full member table + registered-accounts list
+assets/                 Logo (assets/logo.png, not committed by this session)
 ```
 
-No hay build ni `npm install`: son ficheros estáticos que importan
-`supabase-js` directamente desde un CDN (`esm.sh`), así que basta con
-servirlos tal cual.
+No build, no `npm install`: these are static files that import `supabase-js`
+from a CDN (`esm.sh`), so they can be served as-is.
 
-## Configuración pendiente en Supabase
+## Required Supabase setup
 
-1. **Política de lectura de `admins`.** La app necesita poder comprobar si el
-   email logueado está en `admins` para mostrar la pestaña de admin. Si no
-   existe ya, añade en el SQL Editor:
+This project relies on several SQL objects and a couple of dashboard steps
+that live in Supabase, not in this repo. In order:
+
+1. **`admins` table** must allow authenticated read access (so the app can
+   check whether the logged-in email is an admin):
    ```sql
    alter table admins enable row level security;
    create policy "authenticated can read admins"
@@ -37,56 +44,194 @@ servirlos tal cual.
      using (true);
    ```
 
-2. **Importante: visibilidad de `members_public` para usuarios no admin.**
-   Como `members_public` tiene `security_invoker` activado, las políticas RLS
-   de la tabla `members` se aplican también al consultar la vista, con el
-   usuario que hace la consulta. Si la única política de `SELECT` en
-   `members` es "solo admins", un usuario normal autenticado verá `members_public`
-   vacía y la pantalla de "Buscar" no mostrará a nadie salvo a los admins.
-   Para que cualquier miembro autenticado pueda buscar en el directorio,
-   añade una política adicional de `SELECT` en `members` para usuarios
-   autenticados en general (la restricción de columnas sensibles ya la da la
-   vista, no hace falta repetirla en la política):
+2. **`is_member()` helper** — used to gate directory access to people who
+   already have a row in `members` (not just anyone who signed up):
    ```sql
-   create policy "authenticated can read members for directory"
+   create or replace function is_member(user_email text)
+   returns boolean
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select exists (select 1 from members where email = user_email);
+   $$;
+
+   grant execute on function is_member(text) to authenticated;
+   ```
+
+3. **`get_directory()`** — the only way regular (non-admin) members read the
+   directory. Returns non-sensitive columns only, and only to members or
+   admins. Do NOT grant `authenticated` direct `select` on `members` or
+   `members_public` — RLS only filters rows, not columns, so a broad grant
+   plus a permissive policy would let any signed-up account read everyone's
+   phone/NIF/address directly. This function is the safe path:
+   ```sql
+   create or replace function get_directory()
+   returns table (
+     id uuid, nombre text, apellidos text, ciudad text, area_titulacion text,
+     titulacion text, estilos text[], idiomas jsonb, coche text,
+     experiencia text, hobbies text, asociacion text, foto_url text
+   )
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select id, nombre, apellidos, ciudad, area_titulacion, titulacion,
+            estilos, idiomas, coche, experiencia, hobbies, asociacion, foto_url
+     from members
+     where is_member(auth.jwt() ->> 'email')
+        or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email');
+   $$;
+
+   grant execute on function get_directory() to authenticated;
+   ```
+
+4. **`get_distinct_alergias()`** — anonymized list of allergy values already
+   in use (no id/email attached), used to populate a quick-pick dropdown in
+   the profile form:
+   ```sql
+   create or replace function get_distinct_alergias()
+   returns setof text
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select distinct alergias
+     from members
+     where alergias is not null and alergias <> ''
+     order by alergias;
+   $$;
+
+   grant execute on function get_distinct_alergias() to authenticated;
+   ```
+
+5. **Base table grants** — `authenticated` needs `select`/`update` on
+   `members` itself (for admins reading everything, and for each user
+   updating their own row), plus `select` on `admins`:
+   ```sql
+   grant select, update on members to authenticated;
+   grant select on admins to authenticated;
+   ```
+
+   You also need a policy letting each user read (not just update) their own
+   row — `js/profile.js` queries `members` directly, not through
+   `get_directory()`, so without this a non-admin's own profile page shows
+   up as "not found" even though their row exists:
+   ```sql
+   create policy "puedes leer tu propia ficha"
      on members for select
      to authenticated
-     using (true);
+     using (auth.jwt() ->> 'email' = email);
    ```
-   Comprueba tus políticas actuales con:
+
+6. **Group signup password** — a lightweight gate on account creation,
+   checked server-side so the real value never reaches the browser or the
+   (public) repo:
    ```sql
-   select * from pg_policies where tablename = 'members';
+   create table if not exists app_settings (
+     key text primary key,
+     value text not null
+   );
+
+   insert into app_settings (key, value)
+   values ('signup_password', 'CHANGE_ME')
+   on conflict (key) do update set value = excluded.value;
+
+   alter table app_settings enable row level security;
+   -- No select policies on purpose: nobody can read this table directly.
+
+   create or replace function check_signup_password(candidate text)
+   returns boolean
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select exists (
+       select 1 from app_settings
+       where key = 'signup_password' and value = candidate
+     );
+   $$;
+
+   grant execute on function check_signup_password(text) to anon, authenticated;
    ```
-   Pruébalo dado de alta como usuario normal (no admin): entra a "Buscar" y
-   confirma que aparecen otros miembros, no solo tu propia ficha.
 
-3. **Confirmación de email al registrarse.** Por defecto Supabase Auth exige
-   confirmar el email antes de poder iniciar sesión. Para un grupo interno
-   pequeño puedes dejarlo activado (cada persona confirma desde su correo) o
-   desactivarlo en **Authentication → Providers → Email → Confirm email**
-   para simplificar el alta. La app ya contempla ambos casos.
+7. **`list_signups()`** — admin-only listing of Auth accounts (used by the
+   "Cuentas registradas" tab), flags accounts with no matching `members` row:
+   ```sql
+   create or replace function list_signups()
+   returns table (email text, created_at timestamptz, confirmado boolean, tiene_ficha boolean)
+   language plpgsql
+   security definer
+   set search_path = public, auth
+   as $$
+   begin
+     if not exists (select 1 from admins where admins.email = auth.jwt() ->> 'email') then
+       raise exception 'Not authorized';
+     end if;
 
-4. El registro (`signUp`) no comprueba en el navegador que el email ya
-   exista en `members`, porque `members` solo es legible por admins vía RLS
-   (no se puede validar sin autenticar primero). Cualquiera puede crear una
-   cuenta, pero sin una fila en `members` con ese email, "Mi ficha" mostrará
-   un aviso de que no se ha encontrado ninguna ficha, y no aparecerá en las
-   búsquedas de nadie. El control real de quién importa lo da la tabla
-   `members`, no el registro.
+     return query
+     select u.email::text, u.created_at, (u.confirmed_at is not null) as confirmado,
+            exists (select 1 from members m where m.email = u.email) as tiene_ficha
+     from auth.users u
+     order by u.created_at desc;
+   end;
+   $$;
 
-## Desplegar en GitHub Pages
+   grant execute on function list_signups() to authenticated;
+   ```
 
-1. Sube estos cambios a la rama `main` del repo
-   `cristina-radin/CJD-talentos`.
-2. En GitHub: **Settings → Pages**.
-3. En "Build and deployment" elige **Source: Deploy from a branch**, rama
-   `main`, carpeta `/ (root)`.
-4. Guarda. GitHub te dará una URL tipo
-   `https://cristina-radin.github.io/CJD-talentos/`. Tarda uno o dos minutos
-   en publicarse la primera vez.
-5. Cada vez que hagas `git push` a `main` con cambios en estos ficheros, la
-   página se actualiza sola.
+8. **Photo storage** — Storage → Create bucket named `fotos`, marked
+   **public**. Then:
+   ```sql
+   alter table members add column foto_url text;
 
-No hace falta ningún secreto adicional en GitHub: la clave de Supabase usada
-en el frontend es la clave pública ("publishable"), protegida por RLS, así
-que es segura de tener en un repo aunque sea privado o público.
+   create policy "users upload their own photo"
+   on storage.objects for insert
+   to authenticated
+   with check (
+     bucket_id = 'fotos'
+     and (storage.foldername(name))[1] = auth.uid()::text
+   );
+
+   create policy "users update their own photo"
+   on storage.objects for update
+   to authenticated
+   using (
+     bucket_id = 'fotos'
+     and (storage.foldername(name))[1] = auth.uid()::text
+   );
+   ```
+
+9. **`asociacion` column** (regional chapter: Levante / Andalucía / Madrid):
+   ```sql
+   alter table members
+     add column asociacion text check (asociacion in ('LEVANTE', 'ANDALUCIA', 'MADRID'));
+   ```
+
+10. **Email confirmation on sign-up.** Supabase Auth requires email
+    confirmation by default. For a small internal group you can leave it on
+    (each person confirms from their inbox) or turn it off under
+    **Authentication → Providers → Email → Confirm email**. The app handles
+    either case.
+
+Sanity check anytime with:
+```sql
+select policyname, cmd, qual from pg_policies where tablename in ('members', 'admins', 'app_settings');
+select grantee, table_name, privilege_type from information_schema.role_table_grants
+  where table_schema = 'public' and table_name in ('members', 'admins');
+```
+
+## Deploying to GitHub Pages
+
+1. Push changes to `main` on `cristina-radin/CJD-talentos`.
+2. GitHub → **Settings → Pages**.
+3. Under "Build and deployment": **Source: Deploy from a branch**, branch
+   `main`, folder `/ (root)`.
+4. Save. GitHub publishes at `https://cristina-radin.github.io/CJD-talentos/`
+   (first deploy takes a minute or two).
+5. Every `git push` to `main` redeploys automatically.
+
+GitHub Pages on the free plan requires the repo to be **public**. That's
+fine here: the repo only contains app code and the Supabase *publishable*
+key, which is meant to be public and is protected by RLS — no member data
+or secrets live in the repo.
