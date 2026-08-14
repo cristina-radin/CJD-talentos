@@ -1,0 +1,33 @@
+<title>Bolsa de Talentos CJD</title>
+<link rel="stylesheet" href="css/style.css" />
+
+<header class="app-header">
+  <div class="brand">Bolsa de Talentos · CJD</div>
+  <nav class="main-tabs">
+    <button type="button" class="tab-view-btn active" data-view="search">Buscar</button>
+    <button type="button" class="tab-view-btn" data-view="profile">Mi ficha</button>
+    <button type="button" class="tab-view-btn" id="tab-admin-btn" data-view="admin" hidden>Admin</button>
+  </nav>
+  <div class="user-box">
+    <span id="user-email"></span>
+    <button type="button" class="btn secondary" id="logout-btn">Salir</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <section class="view active" id="view-search">
+    <div class="filters" id="search-filters"></div>
+    <div class="count-line" id="search-count"></div>
+    <div class="results-grid" id="search-results"></div>
+  </section>
+
+  <section class="view" id="view-profile">
+    <div id="profile-content"></div>
+  </section>
+
+  <section class="view" id="view-admin">
+    <div id="admin-content"></div>
+  </section>
+</main>
+
+<script type="module" src="js/app.js"></script>
