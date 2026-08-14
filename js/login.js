@@ -50,6 +50,7 @@ signupForm.addEventListener('submit', async (e) => {
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
   const password2 = document.getElementById('signup-password2').value;
+  const groupPassword = document.getElementById('signup-group-password').value;
   const msg = document.getElementById('signup-msg');
   const submitBtn = document.getElementById('signup-submit');
 
@@ -59,6 +60,17 @@ signupForm.addEventListener('submit', async (e) => {
   }
 
   submitBtn.disabled = true;
+
+  const { data: groupOk, error: groupError } = await supabase.rpc('check_signup_password', {
+    candidate: groupPassword,
+  });
+
+  if (groupError || !groupOk) {
+    submitBtn.disabled = false;
+    showMsg(msg, 'Clave de grupo incorrecta.', true);
+    return;
+  }
+
   const { data, error } = await supabase.auth.signUp({ email, password });
   submitBtn.disabled = false;
 
