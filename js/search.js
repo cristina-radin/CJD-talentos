@@ -250,7 +250,7 @@ function renderFullDetail(m) {
     ${formacion ? `<div class="meta">${formacion}</div>` : ''}
     ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
     ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
-    ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
+    ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag tag-outline">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
     ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
     ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
     ${m.disponibilidad ? `<div class="card-section"><span class="card-label">Disponibilidad</span><p>${m.disponibilidad}</p></div>` : ''}

@@ -411,6 +411,11 @@ dialog.lightbox img {
   font-size: 0.78rem;
 }
 
+.tag.tag-outline {
+  background: transparent;
+  color: var(--text-muted);
+}
+
 .tag button {
   background: none;
   border: none;

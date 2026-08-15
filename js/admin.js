@@ -100,7 +100,7 @@ function renderDetail(row) {
         }
         ${
           idiomas.length
-            ? `<div class="full">${detailField('Idiomas', idiomas.map(formatIdiomaEntry).join(', '))}</div>`
+            ? `<div class="full"><label>Idiomas</label><div class="tag-list">${idiomas.map((i) => `<span class="tag tag-outline">${formatIdiomaEntry(i)}</span>`).join('')}</div></div>`
             : ''
         }
       </div>
