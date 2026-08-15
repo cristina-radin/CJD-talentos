@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel, normalizeText } from './format.js';
 import { openLightbox } from './lightbox.js';
 import { initProfile } from './profile.js';
 
@@ -61,9 +61,8 @@ function matchesText(row, q) {
     ...(Array.isArray(row.idiomas) ? row.idiomas.map(formatIdiomaEntry) : []),
   ]
     .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-  return haystack.includes(q);
+    .join(' ');
+  return normalizeText(haystack).includes(normalizeText(q));
 }
 
 function detailField(label, value) {

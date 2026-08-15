@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js';
 import { ESTILOS, ASOCIACIONES, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel, normalizeText } from './format.js';
 import { openLightbox } from './lightbox.js';
 
 let allMembers = [];
@@ -29,9 +29,8 @@ function matchesKeyword(m, q) {
     ...(Array.isArray(m.idiomas) ? m.idiomas.map(formatIdiomaEntry) : []),
   ]
     .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-  return haystack.includes(q);
+    .join(' ');
+  return normalizeText(haystack).includes(normalizeText(q));
 }
 
 function buildSelect(id, labelText, values, labelFn = (v) => v) {
@@ -155,7 +154,7 @@ function applyFilters() {
 
     if (idioma) {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
-      if (!idiomas.some((i) => formatIdiomaEntry(i).toLowerCase().includes(idioma))) return false;
+      if (!idiomas.some((i) => normalizeText(formatIdiomaEntry(i)).includes(normalizeText(idioma)))) return false;
     }
 
     if (activeEstilos.size > 0) {

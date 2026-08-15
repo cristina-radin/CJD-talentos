@@ -1,5 +1,15 @@
 import { ESTILOS_LABELS, ASOCIACION_LABELS } from './config.js';
 
+// "José" -> "jose". Para comparar texto libre en buscadores sin que los
+// acentos importen (quien busca "jose" debe encontrar a "José").
+export function normalizeText(text) {
+  if (!text) return '';
+  return String(text)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 // "CON COCHE" -> "Con coche"
 export function toSentenceCase(str) {
   if (!str) return '';
