@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
+import { ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
 import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
@@ -132,13 +132,9 @@ function renderTitulacionesTags() {
 
 function formHtml(m, options) {
   const estilosActuales = Array.isArray(m.estilos) ? m.estilos : [];
-  const estilosHtml = ESTILOS.map(
-    (estilo) => `
-      <label>
-        <input type="checkbox" class="p-estilo" value="${estilo}" ${estilosActuales.includes(estilo) ? 'checked' : ''} />
-        ${estiloLabel(estilo)}
-      </label>`
-  ).join('');
+  const estilosHtml = estilosActuales.length
+    ? estilosActuales.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')
+    : '<span class="empty-state" style="padding:0">Sin asignar</span>';
 
   const asociacionOptions = ASOCIACIONES.map(
     (a) => `<option value="${a}" ${m.asociacion === a ? 'selected' : ''}>${asociacionLabel(a)}</option>`
@@ -220,8 +216,8 @@ function formHtml(m, options) {
             <textarea id="p-habilidades-cristianas">${m.habilidades_cristianas ?? ''}</textarea>
           </div>
           <div class="full">
-            <label>Estilo de pensamiento</label>
-            <div class="checkbox-row">${estilosHtml}</div>
+            <label>Estilo de pensamiento (no editable)</label>
+            <div class="tag-list">${estilosHtml}</div>
           </div>
           <div class="full">
             <label>Idiomas</label>
@@ -497,8 +493,6 @@ export async function initProfile(session) {
     const submitBtn = document.getElementById('profile-submit');
     submitBtn.disabled = true;
 
-    const estilos = [...document.querySelectorAll('.p-estilo:checked')].map((el) => el.value);
-
     const updates = {
       nombre: document.getElementById('p-nombre').value.trim(),
       apellidos: document.getElementById('p-apellidos').value.trim(),
@@ -512,7 +506,6 @@ export async function initProfile(session) {
       disponibilidad: document.getElementById('p-disponibilidad').value.trim() || null,
       habilidades_humanas: document.getElementById('p-habilidades-humanas').value.trim() || null,
       habilidades_cristianas: document.getElementById('p-habilidades-cristianas').value.trim() || null,
-      estilos,
       idiomas: idiomasList,
       telefono: document.getElementById('p-telefono').value.trim() || null,
       nif: document.getElementById('p-nif').value.trim() || null,

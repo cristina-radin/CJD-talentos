@@ -32,6 +32,13 @@ function renderFilters() {
   const filtersEl = document.getElementById('search-filters');
   filtersEl.innerHTML = '';
 
+  const nombreWrap = document.createElement('div');
+  nombreWrap.className = 'field';
+  nombreWrap.innerHTML = `
+    <label for="f-nombre">Nombre</label>
+    <input type="text" id="f-nombre" placeholder="Buscar por nombre…" />
+  `;
+
   const { wrap: ciudadWrap, select: ciudadSelect } = buildSelect(
     'f-ciudad',
     'Ciudad',
@@ -81,6 +88,7 @@ function renderFilters() {
   });
   estilosWrap.appendChild(checkRow);
 
+  filtersEl.appendChild(nombreWrap);
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
   filtersEl.appendChild(cocheWrap);
@@ -92,9 +100,11 @@ function renderFilters() {
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
+  document.getElementById('f-nombre').addEventListener('input', applyFilters);
 }
 
 function applyFilters() {
+  const nombre = document.getElementById('f-nombre').value.trim().toLowerCase();
   const ciudad = document.getElementById('f-ciudad').value;
   const area = document.getElementById('f-area').value;
   const coche = document.getElementById('f-coche').value;
@@ -102,6 +112,7 @@ function applyFilters() {
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
 
   const filtered = allMembers.filter((m) => {
+    if (nombre && !`${m.nombre ?? ''} ${m.apellidos ?? ''}`.toLowerCase().includes(nombre)) return false;
     if (ciudad && m.ciudad !== ciudad) return false;
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
