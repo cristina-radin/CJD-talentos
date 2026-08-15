@@ -15,11 +15,17 @@ Qué hace:
   - Reparte cada columna del formulario en la columna de `members` que le
     corresponde.
   - Para los campos con vocabulario cerrado (estilos, coche, área de
-    titulación, nivel de idioma) intenta adivinar el valor exacto a partir
-    del texto libre. Cuando no está seguro del todo, se queda con su mejor
-    intento y añade el nombre del campo a la columna `revisar` de esa fila,
-    para que se pueda repasar a mano luego (por ejemplo en Excel/Sheets,
-    filtrando u ordenando por esa columna).
+    titulación) intenta adivinar el valor exacto a partir del texto libre.
+    Cuando no está seguro del todo, se queda con su mejor intento y añade
+    el nombre del campo a la columna `revisar` de esa fila, para que se
+    pueda repasar a mano luego (por ejemplo en Excel/Sheets, filtrando u
+    ordenando por esa columna).
+  - `titulacion` e `idiomas` se dejan siempre en blanco a propósito: el
+    texto libre del formulario ensucia demasiado la lista de sugerencias
+    de la app (aparecen frases enteras como si fueran una titulación).
+    Cada persona los rellena luego desde su propia ficha, con los
+    desplegables ya controlados que tiene la web. El texto original se
+    conserva en las columnas `*_texto_original` por si se quiere retomar.
   - Las columnas sensibles (nombre, apellidos, email, teléfono, domicilio)
     se copian tal cual, sin tocarlas ni intentar adivinar nada en ellas.
   - Los campos que este formulario no recoge (NIF, alergias, fecha de
@@ -30,12 +36,10 @@ Qué hace:
 Formato de columnas especiales en el CSV de salida (para cuando lo
 importes en Supabase):
   - estilos: literal de array de Postgres, p.ej. {CREATIVO,ORGANIZADO}
-  - idiomas: texto JSON, p.ej. [{"n": "Inglés", "nivel": "Avanzado"}]
 """
 
 import argparse
 import csv
-import json
 import re
 import unicodedata
 
@@ -194,60 +198,6 @@ def parse_area_titulacion(texto_estudios):
     return None, True
 
 
-def parse_titulacion(texto_estudios):
-    # Texto libre pasado tal cual (solo se limpian espacios repetidos). No
-    # se marca para revisar: es texto tal cual, no una adivinanza.
-    texto = re.sub(r'\s+', ' ', (texto_estudios or '')).strip()
-    return texto or None
-
-
-# --- Idiomas ---
-# Añade aquí más idiomas si os falta alguno en las respuestas reales.
-IDIOMAS_CONOCIDOS = [
-    'ingles', 'frances', 'aleman', 'italiano', 'portugues', 'valenciano',
-    'catalan', 'euskera', 'gallego', 'chino', 'japones', 'arabe', 'ruso',
-    'rumano',
-]
-
-NIVEL_KEYWORDS = {
-    'Básico': ['basico', 'bajo', 'poco', 'iniciacion'],
-    'Intermedio': ['intermedio', 'medio', 'promedio'],
-    'Avanzado': ['avanzado', 'alto', 'fluido', 'bilingue', 'nativo'],
-}
-
-
-def detectar_nivel(fragmento_normalizado):
-    for nivel, palabras in NIVEL_KEYWORDS.items():
-        if any(p in fragmento_normalizado for p in palabras):
-            return nivel
-    return None
-
-
-def parse_idiomas(texto):
-    if not (texto or '').strip():
-        return [], False
-
-    piezas = re.split(r'[,;]| y ', texto)
-    resultado = []
-    hay_dudas = False
-
-    for pieza in piezas:
-        pieza = pieza.strip()
-        if not pieza:
-            continue
-        norm = normalize(pieza)
-        idioma_encontrado = next((i for i in IDIOMAS_CONOCIDOS if i in norm), None)
-        if not idioma_encontrado:
-            hay_dudas = True
-            continue
-
-        nivel = detectar_nivel(norm)
-        if not nivel:
-            hay_dudas = True
-
-        resultado.append({'n': idioma_encontrado.capitalize(), 'nivel': nivel})
-
-    return resultado, hay_dudas
 
 
 # --- Fila completa ---
@@ -271,11 +221,12 @@ def procesar_fila(fila):
     if dudas_area:
         revisar.append('area_titulacion')
 
-    titulacion = parse_titulacion(fila.get(COL_ESTUDIOS))
-
-    idiomas, dudas_idiomas = parse_idiomas(fila.get(COL_IDIOMAS))
-    if dudas_idiomas:
-        revisar.append('idiomas')
+    # titulacion e idiomas se dejan en blanco a propósito: el texto libre
+    # del formulario ensucia demasiado la lista de sugerencias de la app.
+    # Cada persona los rellena luego desde su propia ficha, con los
+    # desplegables ya controlados. El texto original se conserva en las
+    # columnas *_texto_original por si se quiere retomar más adelante.
+    titulacion = None
 
     return {
         'nombre': nombre,
@@ -290,7 +241,7 @@ def procesar_fila(fila):
         'area_titulacion': area,
         'titulacion': titulacion,
         'estilos': '{' + ','.join(estilos) + '}' if estilos else None,
-        'idiomas': json.dumps(idiomas, ensure_ascii=False) if idiomas else None,
+        'idiomas': None,
         'coche': coche,
         'experiencia': (fila.get(COL_EXPERIENCIA) or '').strip() or None,
         'hobbies': (fila.get(COL_AFICIONES) or '').strip() or None,
