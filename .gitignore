@@ -1,0 +1,5 @@
+# Real member data must never be committed (this repo is public).
+# The standardization script reads/writes CSVs with real names, emails,
+# phone numbers, etc. — keep those files outside this folder, but this is
+# a safety net in case one ends up here by accident.
+*.csv

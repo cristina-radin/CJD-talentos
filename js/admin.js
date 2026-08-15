@@ -38,10 +38,14 @@ function matchesText(row, q) {
     row.coche,
     row.experiencia,
     row.hobbies,
+    row.disponibilidad,
+    row.habilidades_humanas,
+    row.habilidades_cristianas,
     row.telefono,
     row.nif,
     row.domicilio,
     row.alergias,
+    row.observaciones,
     ...(Array.isArray(row.estilos) ? row.estilos : []),
     ...(Array.isArray(row.idiomas) ? row.idiomas.map(formatIdiomaEntry) : []),
   ]
@@ -75,6 +79,9 @@ function renderDetail(row) {
         ${detailField('Coche', row.coche ? toSentenceCase(row.coche) : '')}
         <div class="full">${detailField('Experiencia', row.experiencia)}</div>
         <div class="full">${detailField('Hobbies', row.hobbies)}</div>
+        <div class="full">${detailField('Disponibilidad', row.disponibilidad)}</div>
+        <div class="full">${detailField('Habilidades humanas', row.habilidades_humanas)}</div>
+        <div class="full">${detailField('Habilidades cristianas/carmelitanas', row.habilidades_cristianas)}</div>
         ${
           estilos.length
             ? `<div class="full"><label>Estilo de pensamiento</label><div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div></div>`
@@ -96,6 +103,7 @@ function renderDetail(row) {
         ${detailField('Fecha de nacimiento', row.nacimiento)}
         <div class="full">${detailField('Domicilio', row.domicilio)}</div>
         <div class="full">${detailField('Alergias', row.alergias)}</div>
+        <div class="full">${detailField('Observaciones', row.observaciones)}</div>
       </div>
     </fieldset>
   `;

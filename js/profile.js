@@ -208,6 +208,18 @@ function formHtml(m, options) {
             <textarea id="p-hobbies" placeholder="Sepára varios con comas, p.ej: fútbol, lectura, viajar">${m.hobbies ?? ''}</textarea>
           </div>
           <div class="full">
+            <label for="p-disponibilidad">Disponibilidad</label>
+            <textarea id="p-disponibilidad" placeholder="Ej: fines de semana, tardes entre semana...">${m.disponibilidad ?? ''}</textarea>
+          </div>
+          <div class="full">
+            <label for="p-habilidades-humanas">Habilidades y competencias humanas</label>
+            <textarea id="p-habilidades-humanas">${m.habilidades_humanas ?? ''}</textarea>
+          </div>
+          <div class="full">
+            <label for="p-habilidades-cristianas">Habilidades y competencias cristianas/carmelitanas</label>
+            <textarea id="p-habilidades-cristianas">${m.habilidades_cristianas ?? ''}</textarea>
+          </div>
+          <div class="full">
             <label>Estilo de pensamiento</label>
             <div class="checkbox-row">${estilosHtml}</div>
           </div>
@@ -263,6 +275,10 @@ function formHtml(m, options) {
               <input type="text" id="p-alergia-otro" placeholder="Escribe la alergia" style="display:none" />
               <button type="button" class="btn secondary" id="p-alergia-add">Añadir</button>
             </div>
+          </div>
+          <div class="full">
+            <label for="p-observaciones">Observaciones</label>
+            <textarea id="p-observaciones">${m.observaciones ?? ''}</textarea>
           </div>
         </div>
       </fieldset>
@@ -493,6 +509,9 @@ export async function initProfile(session) {
       titulacion: titulacionesList.length ? titulacionesList.join(', ') : null,
       experiencia: document.getElementById('p-experiencia').value.trim() || null,
       hobbies: document.getElementById('p-hobbies').value.trim() || null,
+      disponibilidad: document.getElementById('p-disponibilidad').value.trim() || null,
+      habilidades_humanas: document.getElementById('p-habilidades-humanas').value.trim() || null,
+      habilidades_cristianas: document.getElementById('p-habilidades-cristianas').value.trim() || null,
       estilos,
       idiomas: idiomasList,
       telefono: document.getElementById('p-telefono').value.trim() || null,
@@ -500,6 +519,7 @@ export async function initProfile(session) {
       nacimiento: nacimientoValue(),
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
       alergias: alergiasList.length ? alergiasList.join(', ') : null,
+      observaciones: document.getElementById('p-observaciones').value.trim() || null,
     };
 
     const { error: updateError } = await supabase.from('members').update(updates).eq('email', email);

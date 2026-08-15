@@ -152,6 +152,9 @@ function renderResults(members) {
           ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
           ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
           ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
+          ${m.disponibilidad ? `<div class="card-section"><span class="card-label">Disponibilidad</span><p>${m.disponibilidad}</p></div>` : ''}
+          ${m.habilidades_humanas ? `<div class="card-section"><span class="card-label">Habilidades humanas</span><p>${m.habilidades_humanas}</p></div>` : ''}
+          ${m.habilidades_cristianas ? `<div class="card-section"><span class="card-label">Habilidades cristianas</span><p>${m.habilidades_cristianas}</p></div>` : ''}
         </div>
       `;
     })
