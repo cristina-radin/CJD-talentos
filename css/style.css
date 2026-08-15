@@ -147,7 +147,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
 
 label {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   display: block;
   margin-bottom: 4px;
