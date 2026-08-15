@@ -163,7 +163,9 @@ def main():
 
     todas = filas_principales + filas_extra
 
-    with open(args.salida, 'w', newline='', encoding='utf-8') as f_out:
+    # utf-8-sig añade la marca BOM: sin ella, Excel en Windows a veces abre
+    # los CSV en UTF-8 como si fueran ANSI y rompe los acentos al mostrarlos.
+    with open(args.salida, 'w', newline='', encoding='utf-8-sig') as f_out:
         escritor = csv.DictWriter(f_out, fieldnames=columnas)
         escritor.writeheader()
         escritor.writerows(todas)

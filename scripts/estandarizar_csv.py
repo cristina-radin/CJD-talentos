@@ -343,7 +343,10 @@ def main():
     filas_entrada = leer_filas_csv(args.entrada)
     filas_salida = [procesar_fila(fila) for fila in filas_entrada]
 
-    with open(args.salida, 'w', newline='', encoding='utf-8') as f_out:
+    # utf-8-sig añade la marca BOM al principio del archivo: sin ella, Excel
+    # en Windows a veces abre los CSV en UTF-8 como si fueran ANSI y rompe
+    # los acentos al mostrarlos (aunque el archivo esté bien).
+    with open(args.salida, 'w', newline='', encoding='utf-8-sig') as f_out:
         escritor = csv.DictWriter(f_out, fieldnames=OUTPUT_COLUMNS)
         escritor.writeheader()
         escritor.writerows(filas_salida)
