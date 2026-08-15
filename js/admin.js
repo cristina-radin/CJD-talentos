@@ -19,6 +19,7 @@ const SENSITIVE_COLUMNS = [
   { key: 'domicilio', label: 'Domicilio' },
   { key: 'nacimiento', label: 'Nacimiento' },
   { key: 'alergias', label: 'Alergias' },
+  { key: 'observaciones', label: 'Observaciones' },
 ];
 
 function distinctValues(rows, field) {
@@ -262,6 +263,7 @@ async function renderSignupsPanel(panel) {
             <th>Registrado</th>
             <th>Email confirmado</th>
             <th>Tiene ficha</th>
+            <th>Última modificación de la ficha</th>
           </tr>
         </thead>
         <tbody>
@@ -273,6 +275,7 @@ async function renderSignupsPanel(panel) {
               <td>${formatDate(r.created_at)}</td>
               <td>${r.confirmado ? 'Sí' : 'No'}</td>
               <td class="${r.tiene_ficha ? '' : 'sensitive'}">${r.tiene_ficha ? 'Sí' : 'No'}</td>
+              <td>${formatDate(r.ficha_actualizada_en) || '—'}</td>
             </tr>`
             )
             .join('')}
