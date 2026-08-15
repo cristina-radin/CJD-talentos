@@ -134,6 +134,13 @@ function applyFilters() {
   renderResults(filtered);
 }
 
+function lugarYFormacion(m) {
+  const titulaciones = m.titulacion ? m.titulacion.split(',').map((t) => t.trim()).filter(Boolean) : [];
+  const lugar = [m.ciudad, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ');
+  const formacion = [m.area_titulacion, titulaciones.join(', ') || null].filter(Boolean).join(' · ');
+  return { lugar, formacion };
+}
+
 function renderResults(members) {
   const grid = document.getElementById('search-results');
   const countLine = document.getElementById('search-count');
@@ -146,34 +153,83 @@ function renderResults(members) {
 
   grid.innerHTML = members
     .map((m) => {
-      const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
       const estilos = Array.isArray(m.estilos) ? m.estilos : [];
-      const titulaciones = m.titulacion ? m.titulacion.split(',').map((t) => t.trim()).filter(Boolean) : [];
-      const lugar = [m.ciudad, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ');
-      const formacion = [m.area_titulacion, titulaciones.join(', ') || null].filter(Boolean).join(' · ');
+      const { lugar, formacion } = lugarYFormacion(m);
 
       return `
-        <div class="member-card">
+        <div class="member-card" data-id="${m.id}">
           ${m.foto_url ? `<img class="member-photo" src="${m.foto_url}" alt="Foto de ${m.nombre ?? ''}" data-full="${m.foto_url}" />` : ''}
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
           ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
-          ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
-          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
-          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
-          ${m.disponibilidad ? `<div class="card-section"><span class="card-label">Disponibilidad</span><p>${m.disponibilidad}</p></div>` : ''}
-          ${m.habilidades_humanas ? `<div class="card-section"><span class="card-label">Habilidades humanas</span><p>${m.habilidades_humanas}</p></div>` : ''}
-          ${m.habilidades_cristianas ? `<div class="card-section"><span class="card-label">Habilidades cristianas</span><p>${m.habilidades_cristianas}</p></div>` : ''}
         </div>
       `;
     })
     .join('');
 
   grid.querySelectorAll('.member-photo').forEach((img) => {
-    img.addEventListener('click', () => openLightbox(img.dataset.full));
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(img.dataset.full);
+    });
   });
+
+  grid.querySelectorAll('.member-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const member = members.find((m) => m.id === card.dataset.id);
+      if (member) openDetail(member);
+    });
+  });
+}
+
+function renderFullDetail(m) {
+  const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
+  const estilos = Array.isArray(m.estilos) ? m.estilos : [];
+  const { lugar, formacion } = lugarYFormacion(m);
+
+  return `
+    ${m.foto_url ? `<img class="detail-photo" src="${m.foto_url}" alt="" data-full="${m.foto_url}" />` : ''}
+    <h2 style="margin:0 0 4px">${m.nombre ?? ''} ${m.apellidos ?? ''}</h2>
+    ${lugar ? `<div class="meta">${lugar}</div>` : ''}
+    ${formacion ? `<div class="meta">${formacion}</div>` : ''}
+    ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
+    ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+    ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
+    ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
+    ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
+    ${m.disponibilidad ? `<div class="card-section"><span class="card-label">Disponibilidad</span><p>${m.disponibilidad}</p></div>` : ''}
+    ${m.habilidades_humanas ? `<div class="card-section"><span class="card-label">Habilidades humanas</span><p>${m.habilidades_humanas}</p></div>` : ''}
+    ${m.habilidades_cristianas ? `<div class="card-section"><span class="card-label">Habilidades cristianas</span><p>${m.habilidades_cristianas}</p></div>` : ''}
+  `;
+}
+
+let dialogEl = null;
+
+function ensureDialog() {
+  if (dialogEl) return dialogEl;
+  dialogEl = document.createElement('dialog');
+  dialogEl.className = 'member-dialog';
+  dialogEl.innerHTML = `
+    <button type="button" class="btn secondary member-dialog-close">Cerrar</button>
+    <div class="member-dialog-body"></div>
+  `;
+  document.body.appendChild(dialogEl);
+  dialogEl.querySelector('.member-dialog-close').addEventListener('click', () => dialogEl.close());
+  dialogEl.addEventListener('click', (e) => {
+    if (e.target === dialogEl) dialogEl.close();
+  });
+  return dialogEl;
+}
+
+function openDetail(m) {
+  const dialog = ensureDialog();
+  const body = dialog.querySelector('.member-dialog-body');
+  body.innerHTML = renderFullDetail(m);
+  const photo = body.querySelector('.detail-photo');
+  if (photo) photo.addEventListener('click', () => openLightbox(photo.dataset.full));
+  dialog.showModal();
 }
 
 export async function initSearch() {
