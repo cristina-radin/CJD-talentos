@@ -115,7 +115,7 @@ function renderFilters() {
   ocdWrap.innerHTML = `
     <label>OCD</label>
     <div class="checkbox-row">
-      <label><input type="checkbox" id="f-ocd" /> Mostrar solo OCD</label>
+      <label><input type="checkbox" id="f-ocd" /></label>
     </div>
   `;
 
