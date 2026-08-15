@@ -274,115 +274,20 @@ async function renderSignupsPanel(panel) {
   `;
 }
 
-const CORREGIBLES = [
-  { field: 'ciudad', label: 'Ciudad' },
-  { field: 'titulacion', label: 'Titulación' },
-  { field: 'alergias', label: 'Alergias' },
-];
-
-function renderFixValues(panel, field) {
-  const counts = new Map();
-  allMembers.forEach((row) => {
-    const v = row[field];
-    if (!v) return;
-    // alergias y titulación pueden tener varios valores separados por comas
-    // en el mismo campo; ciudad es de un solo valor.
-    const multivalor = field === 'alergias' || field === 'titulacion';
-    const tokens = multivalor ? v.split(',').map((t) => t.trim()).filter(Boolean) : [v];
-    tokens.forEach((token) => counts.set(token, (counts.get(token) ?? 0) + 1));
-  });
-
-  const rows = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es'));
-  const listBox = panel.querySelector('#admin-fix-list');
-
-  if (rows.length === 0) {
-    listBox.innerHTML = '<div class="empty-state">Nadie tiene ese campo relleno todavía.</div>';
-    return;
-  }
-
-  listBox.innerHTML = `
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead><tr><th>Valor</th><th>Personas</th><th></th></tr></thead>
-        <tbody>
-          ${rows
-            .map(
-              ([value, count]) => `
-            <tr>
-              <td>${value}</td>
-              <td>${count}</td>
-              <td><button type="button" class="btn secondary admin-fix-edit" data-value="${value}">Editar</button></td>
-            </tr>`
-            )
-            .join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  listBox.querySelectorAll('.admin-fix-edit').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const oldValue = btn.dataset.value;
-      const newValue = prompt(`Nuevo valor para reemplazar "${oldValue}":`, oldValue);
-      if (newValue === null) return;
-      const trimmed = newValue.trim();
-      if (!trimmed || trimmed === oldValue) return;
-      if (!confirm(`Se cambiará "${oldValue}" por "${trimmed}" en todas las fichas que lo tengan. ¿Continuar?`)) return;
-
-      const { data: affected, error } = await supabase.rpc('admin_rename_value', {
-        field_name: field,
-        old_value: oldValue,
-        new_value: trimmed,
-      });
-
-      if (error) {
-        alert('No se pudo corregir: ' + error.message);
-        return;
-      }
-
-      allMembers.forEach((row) => {
-        if (row[field] === oldValue) row[field] = trimmed;
-      });
-
-      renderFixValues(panel, field);
-      alert(`Corregido en ${affected} ficha${affected === 1 ? '' : 's'}.`);
-    });
-  });
-}
-
-function renderFixPanel(panel) {
-  panel.innerHTML = `
-    <div class="field" style="max-width:280px;margin-bottom:14px">
-      <label for="admin-fix-field">Campo a corregir</label>
-      <select id="admin-fix-field">
-        ${CORREGIBLES.map((c) => `<option value="${c.field}">${c.label}</option>`).join('')}
-      </select>
-    </div>
-    <div id="admin-fix-list"></div>
-  `;
-
-  const select = document.getElementById('admin-fix-field');
-  select.addEventListener('change', () => renderFixValues(panel, select.value));
-  renderFixValues(panel, select.value);
-}
-
 export async function initAdmin() {
   const content = document.getElementById('admin-content');
   content.innerHTML = `
     <div class="tabs">
       <button type="button" class="tab-btn active" data-subview="fichas">Fichas</button>
       <button type="button" class="tab-btn" data-subview="signups">Cuentas registradas</button>
-      <button type="button" class="tab-btn" data-subview="fix">Corregir valores</button>
     </div>
     <div id="admin-panel-fichas"></div>
     <div id="admin-panel-signups" style="display:none"></div>
-    <div id="admin-panel-fix" style="display:none"></div>
   `;
 
   const panels = {
     fichas: document.getElementById('admin-panel-fichas'),
     signups: document.getElementById('admin-panel-signups'),
-    fix: document.getElementById('admin-panel-fix'),
   };
   const subtabButtons = content.querySelectorAll('.tab-btn');
 
@@ -397,7 +302,6 @@ export async function initAdmin() {
         panels.signups.dataset.loaded = 'true';
         renderSignupsPanel(panels.signups);
       }
-      if (target === 'fix') renderFixPanel(panels.fix);
     });
   });
 

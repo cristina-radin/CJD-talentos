@@ -378,6 +378,23 @@ dialog.lightbox img {
   padding-right: 56px;
 }
 
+.card-section { margin-top: 10px; }
+
+.card-section p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.card-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
 .tag-list {
   display: flex;
   flex-wrap: wrap;

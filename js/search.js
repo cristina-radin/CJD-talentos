@@ -142,13 +142,21 @@ function renderResults(members) {
           ${m.foto_url ? `<img class="member-photo" src="${m.foto_url}" alt="Foto de ${m.nombre ?? ''}" data-full="${m.foto_url}" />` : ''}
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
           <div class="meta">
-            ${[m.ciudad, m.titulacion, m.area_titulacion, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ')}
+            ${[m.ciudad, m.area_titulacion, m.titulacion, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ')}
           </div>
-          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
-          ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-          ${m.experiencia ? `<p>${m.experiencia}</p>` : ''}
-          ${m.hobbies ? `<p><em>${m.hobbies}</em></p>` : ''}
+          ${
+            estilos.length
+              ? `<div class="card-section"><span class="card-label">Estilo de pensamiento</span><div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div></div>`
+              : ''
+          }
+          ${
+            idiomas.length
+              ? `<div class="card-section"><span class="card-label">Idiomas</span><div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div></div>`
+              : ''
+          }
+          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
+          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
         </div>
       `;
     })
