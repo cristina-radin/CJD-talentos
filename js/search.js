@@ -54,18 +54,11 @@ function renderFilters() {
   const filtersEl = document.getElementById('search-filters');
   filtersEl.innerHTML = '';
 
-  const nombreWrap = document.createElement('div');
-  nombreWrap.className = 'field';
-  nombreWrap.innerHTML = `
-    <label for="f-nombre">Nombre</label>
-    <input type="text" id="f-nombre" placeholder="Buscar por nombre…" />
-  `;
-
   const keywordWrap = document.createElement('div');
   keywordWrap.className = 'field';
   keywordWrap.innerHTML = `
     <label for="f-keyword">Palabra clave</label>
-    <input type="text" id="f-keyword" placeholder="Busca en experiencia, hobbies, habilidades…" />
+    <input type="text" id="f-keyword" placeholder="Nombre, experiencia, hobbies, habilidades…" />
   `;
 
   const { wrap: ciudadWrap, select: ciudadSelect } = buildSelect(
@@ -117,7 +110,6 @@ function renderFilters() {
   });
   estilosWrap.appendChild(checkRow);
 
-  filtersEl.appendChild(nombreWrap);
   filtersEl.appendChild(keywordWrap);
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
@@ -130,12 +122,10 @@ function renderFilters() {
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
-  document.getElementById('f-nombre').addEventListener('input', applyFilters);
   document.getElementById('f-keyword').addEventListener('input', applyFilters);
 }
 
 function applyFilters() {
-  const nombre = document.getElementById('f-nombre').value.trim().toLowerCase();
   const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
   const ciudad = document.getElementById('f-ciudad').value;
   const area = document.getElementById('f-area').value;
@@ -144,7 +134,6 @@ function applyFilters() {
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
 
   const filtered = allMembers.filter((m) => {
-    if (nombre && !`${m.nombre ?? ''} ${m.apellidos ?? ''}`.toLowerCase().includes(nombre)) return false;
     if (keyword && !matchesKeyword(m, keyword)) return false;
     if (ciudad && m.ciudad !== ciudad) return false;
     if (area && m.area_titulacion !== area) return false;
