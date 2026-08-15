@@ -91,10 +91,6 @@ function renderFilters() {
     <input type="text" id="f-idioma" placeholder="p.ej. inglés" />
   `;
 
-  const { wrap: ocdWrap, select: ocdSelect } = buildSelect('f-ocd', 'OCD', ['true', 'false'], (v) =>
-    v === 'true' ? 'Sí' : 'No'
-  );
-
   const estilosWrap = document.createElement('div');
   estilosWrap.className = 'field';
   estilosWrap.style.gridColumn = '1 / -1';
@@ -114,20 +110,30 @@ function renderFilters() {
   });
   estilosWrap.appendChild(checkRow);
 
+  const ocdWrap = document.createElement('div');
+  ocdWrap.className = 'field';
+  ocdWrap.style.gridColumn = '1 / -1';
+  ocdWrap.innerHTML = `
+    <div class="checkbox-row">
+      <label><input type="checkbox" id="f-ocd" /> OCD</label>
+    </div>
+  `;
+
   filtersEl.appendChild(keywordWrap);
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
   filtersEl.appendChild(cocheWrap);
   filtersEl.appendChild(asociacionWrap);
   filtersEl.appendChild(idiomaWrap);
-  filtersEl.appendChild(ocdWrap);
   filtersEl.appendChild(estilosWrap);
+  filtersEl.appendChild(ocdWrap);
 
-  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect, ocdSelect].forEach((sel) =>
+  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect].forEach((sel) =>
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
   document.getElementById('f-keyword').addEventListener('input', applyFilters);
+  document.getElementById('f-ocd').addEventListener('change', applyFilters);
 }
 
 function applyFilters() {
@@ -137,7 +143,7 @@ function applyFilters() {
   const coche = document.getElementById('f-coche').value;
   const asociacion = document.getElementById('f-asociacion').value;
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
-  const ocd = document.getElementById('f-ocd').value;
+  const ocd = document.getElementById('f-ocd').checked;
 
   const filtered = allMembers.filter((m) => {
     if (keyword && !matchesKeyword(m, keyword)) return false;
@@ -145,7 +151,7 @@ function applyFilters() {
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
     if (asociacion && m.asociacion !== asociacion) return false;
-    if (ocd && String(Boolean(m.ocd)) !== ocd) return false;
+    if (ocd && !m.ocd) return false;
 
     if (idioma) {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
