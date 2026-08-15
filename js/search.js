@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES } from './config.js';
+import { ESTILOS, ASOCIACIONES, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
 import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
 import { openLightbox } from './lightbox.js';
 
@@ -40,12 +40,12 @@ function renderFilters() {
   const { wrap: areaWrap, select: areaSelect } = buildSelect(
     'f-area',
     'Área de titulación',
-    distinctValues(allMembers, 'area_titulacion')
+    AREAS_TITULACION
   );
   const { wrap: cocheWrap, select: cocheSelect } = buildSelect(
     'f-coche',
     'Coche',
-    distinctValues(allMembers, 'coche'),
+    COCHE_OPCIONES,
     toSentenceCase
   );
   const { wrap: asociacionWrap, select: asociacionSelect } = buildSelect(
@@ -146,7 +146,7 @@ function renderResults(members) {
           </div>
           ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
           ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
-          ${m.coche ? `<div class="meta">Coche: ${toSentenceCase(m.coche)}</div>` : ''}
+          ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
           ${m.experiencia ? `<p>${m.experiencia}</p>` : ''}
           ${m.hobbies ? `<p><em>${m.hobbies}</em></p>` : ''}
         </div>

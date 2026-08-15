@@ -15,10 +15,6 @@ function showView(name) {
   viewButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.view === name));
 }
 
-viewButtons.forEach((btn) => {
-  btn.addEventListener('click', () => showView(btn.dataset.view));
-});
-
 async function main() {
   const session = await requireSession();
   if (!session) return;
@@ -27,13 +23,26 @@ async function main() {
   document.getElementById('logout-btn').addEventListener('click', logout);
 
   const admin = await checkIsAdmin(session.user.email);
-  if (admin) {
-    document.getElementById('tab-admin-btn').hidden = false;
-    initAdmin();
-  }
+  if (admin) document.getElementById('tab-admin-btn').hidden = false;
+
+  // Cada pestaña vuelve a pedir sus datos cada vez que se abre, para no
+  // enseñar información desactualizada tras guardar cambios en otra pestaña.
+  const refreshers = {
+    search: initSearch,
+    profile: () => initProfile(session),
+    admin: admin ? initAdmin : null,
+  };
+
+  viewButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      showView(btn.dataset.view);
+      refreshers[btn.dataset.view]?.();
+    });
+  });
 
   initSearch();
   initProfile(session);
+  if (admin) initAdmin();
 }
 
 main();

@@ -29,3 +29,18 @@ export const ASOCIACION_LABELS = {
 // Niveles fijos de idioma, para que el filtro de búsqueda pueda comparar
 // niveles de forma fiable en vez de depender de texto libre.
 export const NIVELES_IDIOMA = ['Básico', 'Intermedio', 'Avanzado'];
+
+// Coche: lista cerrada, sin opción de "otra". Cada valor ya se basta solo
+// como frase (por eso no se le pone la etiqueta "Coche:" delante al mostrarlo).
+export const COCHE_OPCIONES = ['CON CARNÉ, SIN COCHE', 'CON CARNÉ CON COCHE', 'SIN CARNÉ'];
+
+// Área de titulación: las 5 ramas de conocimiento oficiales usadas en las
+// universidades españolas. Lista cerrada, sin "otra" — si a alguien no le
+// encaja del todo, es la más parecida.
+export const AREAS_TITULACION = [
+  'Artes y Humanidades',
+  'Ciencias',
+  'Ciencias de la Salud',
+  'Ciencias Sociales y Jurídicas',
+  'Ingeniería y Arquitectura',
+];

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA } from './config.js';
+import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
 import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
@@ -50,7 +50,52 @@ function comboFieldValue(id) {
   return select.value || null;
 }
 
-const ALERGIAS_RAPIDAS = ['Ninguna', 'Ninguna conocida'];
+const ALERGIAS_RAPIDAS = ['Ninguna'];
+
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+// nacimiento se guarda como texto "DD/MM/AAAA". Estos helpers convierten
+// entre ese formato y los tres desplegables (día/mes/año) del formulario.
+function parseNacimiento(value) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value ?? '');
+  if (!match) return { dia: '', mes: '', anio: '' };
+  return { dia: match[1], mes: match[2], anio: match[3] };
+}
+
+function nacimientoFieldsHtml(value) {
+  const { dia, mes, anio } = parseNacimiento(value);
+  const currentYear = new Date().getFullYear();
+
+  const diaOpts = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'))
+    .map((d) => `<option value="${d}" ${dia === d ? 'selected' : ''}>${d}</option>`)
+    .join('');
+  const mesOpts = MESES.map(
+    (nombre, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${mes === String(i + 1).padStart(2, '0') ? 'selected' : ''}>${nombre}</option>`
+  ).join('');
+  // No se permiten años futuros: estamos hablando de una fecha de nacimiento.
+  const anioOpts = Array.from({ length: 100 }, (_, i) => String(currentYear - i))
+    .map((a) => `<option value="${a}" ${anio === a ? 'selected' : ''}>${a}</option>`)
+    .join('');
+
+  return `
+    <div class="tag-input-row">
+      <select id="p-nacimiento-dia"><option value="">Día</option>${diaOpts}</select>
+      <select id="p-nacimiento-mes"><option value="">Mes</option>${mesOpts}</select>
+      <select id="p-nacimiento-anio"><option value="">Año</option>${anioOpts}</select>
+    </div>
+  `;
+}
+
+function nacimientoValue() {
+  const dia = document.getElementById('p-nacimiento-dia').value;
+  const mes = document.getElementById('p-nacimiento-mes').value;
+  const anio = document.getElementById('p-nacimiento-anio').value;
+  if (!dia || !mes || !anio) return null;
+  return `${dia}/${mes}/${anio}`;
+}
 
 function renderIdiomasTags() {
   const box = document.getElementById('p-idiomas-tags');
@@ -107,7 +152,13 @@ function formHtml(m, options) {
             <input type="text" id="p-apellidos" required value="${m.apellidos ?? ''}" />
           </div>
           ${comboFieldHtml('p-ciudad', 'Ciudad', options.ciudad, m.ciudad)}
-          ${comboFieldHtml('p-coche', 'Coche', options.coche, m.coche, { labelFn: toSentenceCase })}
+          <div>
+            <label for="p-coche">Coche</label>
+            <select id="p-coche">
+              <option value="">Sin especificar</option>
+              ${COCHE_OPCIONES.map((c) => `<option value="${c}" ${m.coche === c ? 'selected' : ''}>${toSentenceCase(c)}</option>`).join('')}
+            </select>
+          </div>
           <div>
             <label for="p-asociacion">Asociación</label>
             <select id="p-asociacion">
@@ -115,15 +166,21 @@ function formHtml(m, options) {
               ${asociacionOptions}
             </select>
           </div>
-          ${comboFieldHtml('p-area', 'Área de titulación', options.area_titulacion, m.area_titulacion)}
+          <div>
+            <label for="p-area">Área de titulación</label>
+            <select id="p-area">
+              <option value="">Sin especificar</option>
+              ${AREAS_TITULACION.map((a) => `<option value="${a}" ${m.area_titulacion === a ? 'selected' : ''}>${a}</option>`).join('')}
+            </select>
+          </div>
           ${comboFieldHtml('p-titulacion', 'Titulación', options.titulacion, m.titulacion)}
           <div class="full">
             <label for="p-experiencia">Experiencia</label>
-            <textarea id="p-experiencia">${m.experiencia ?? ''}</textarea>
+            <textarea id="p-experiencia" placeholder="Sepára los puntos con comas, p.ej: diseño gráfico, gestión de equipos, marketing">${m.experiencia ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-hobbies">Hobbies</label>
-            <textarea id="p-hobbies">${m.hobbies ?? ''}</textarea>
+            <textarea id="p-hobbies" placeholder="Sepára varios con comas, p.ej: fútbol, lectura, viajar">${m.hobbies ?? ''}</textarea>
           </div>
           <div class="full">
             <label>Estilo de pensamiento</label>
@@ -140,11 +197,12 @@ function formHtml(m, options) {
               </select>
               <input type="text" id="p-idioma-nombre-otro" placeholder="Escribe el idioma" style="display:none" />
               <select id="p-idioma-nivel">
-                <option value="">Nivel (opcional)</option>
+                <option value="">Elige nivel…</option>
                 ${NIVELES_IDIOMA.map((n) => `<option value="${n}">${n}</option>`).join('')}
               </select>
               <button type="button" class="btn secondary" id="p-idioma-add">Añadir</button>
             </div>
+            <div class="msg" id="p-idioma-msg"></div>
           </div>
         </div>
       </fieldset>
@@ -161,12 +219,12 @@ function formHtml(m, options) {
             <input type="text" id="p-nif" value="${m.nif ?? ''}" />
           </div>
           <div>
-            <label for="p-nacimiento">Fecha de nacimiento</label>
-            <input type="date" id="p-nacimiento" value="${m.nacimiento ?? ''}" />
+            <label for="p-nacimiento-dia">Fecha de nacimiento</label>
+            ${nacimientoFieldsHtml(m.nacimiento)}
           </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
-            <input type="text" id="p-domicilio" value="${m.domicilio ?? ''}" />
+            <input type="text" id="p-domicilio" placeholder="C/ Mayor 12, 3ºB, Valencia" value="${m.domicilio ?? ''}" />
           </div>
           ${comboFieldHtml('p-alergias', 'Alergias', options.alergias, m.alergias, { multiline: true, wrapClass: 'full' })}
         </div>
@@ -233,8 +291,6 @@ export async function initProfile(session) {
 
   const options = {
     ciudad: distinct('ciudad'),
-    area_titulacion: distinct('area_titulacion'),
-    coche: distinct('coche'),
     titulacion: distinct('titulacion'),
     idiomas: idiomaNombres,
     alergias: [...new Set([...ALERGIAS_RAPIDAS, ...(alergiasExistentes ?? [])])],
@@ -242,7 +298,7 @@ export async function initProfile(session) {
 
   content.innerHTML = formHtml(member, options);
   renderIdiomasTags();
-  ['p-ciudad', 'p-coche', 'p-area', 'p-titulacion', 'p-alergias'].forEach(wireComboField);
+  ['p-ciudad', 'p-titulacion', 'p-alergias'].forEach(wireComboField);
 
   document.getElementById('p-idioma-select').addEventListener('change', (e) => {
     const otro = document.getElementById('p-idioma-nombre-otro');
@@ -295,12 +351,19 @@ export async function initProfile(session) {
     const select = document.getElementById('p-idioma-select');
     const otroInput = document.getElementById('p-idioma-nombre-otro');
     const nivelSelect = document.getElementById('p-idioma-nivel');
+    const idiomaMsg = document.getElementById('p-idioma-msg');
 
     const idioma = select.value === '__otro__' ? otroInput.value.trim() : select.value;
     const nivel = nivelSelect.value;
-    if (!idioma) return;
 
-    idiomasList.push(nivel ? { n: idioma, nivel } : { n: idioma });
+    if (!idioma || !nivel) {
+      idiomaMsg.className = 'msg show error';
+      idiomaMsg.textContent = 'Elige idioma y nivel antes de añadir.';
+      return;
+    }
+    idiomaMsg.className = 'msg';
+
+    idiomasList.push({ n: idioma, nivel });
 
     select.value = '';
     otroInput.value = '';
@@ -320,9 +383,9 @@ export async function initProfile(session) {
       nombre: document.getElementById('p-nombre').value.trim(),
       apellidos: document.getElementById('p-apellidos').value.trim(),
       ciudad: comboFieldValue('p-ciudad'),
-      coche: comboFieldValue('p-coche')?.toUpperCase() || null,
+      coche: document.getElementById('p-coche').value || null,
       asociacion: document.getElementById('p-asociacion').value || null,
-      area_titulacion: comboFieldValue('p-area'),
+      area_titulacion: document.getElementById('p-area').value || null,
       titulacion: comboFieldValue('p-titulacion'),
       experiencia: document.getElementById('p-experiencia').value.trim() || null,
       hobbies: document.getElementById('p-hobbies').value.trim() || null,
@@ -330,7 +393,7 @@ export async function initProfile(session) {
       idiomas: idiomasList,
       telefono: document.getElementById('p-telefono').value.trim() || null,
       nif: document.getElementById('p-nif').value.trim() || null,
-      nacimiento: document.getElementById('p-nacimiento').value || null,
+      nacimiento: nacimientoValue(),
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
       alergias: comboFieldValue('p-alergias'),
     };
