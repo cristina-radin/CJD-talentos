@@ -144,20 +144,15 @@ function renderTable(rows) {
       <th>Nombre</th>
       <th>Email</th>
       <th>Asociación</th>
-      <th>Habilidades</th>
-      <th>Disponibilidad</th>
       ${SENSITIVE_COLUMNS.map((c) => `<th>${c.label}</th>`).join('')}
     </tr>`;
   const body = rows
     .map((row) => {
-      const habilidades = [row.habilidades_humanas, row.habilidades_cristianas].filter(Boolean).join(' · ');
       return `
     <tr>
       <td><button type="button" class="admin-name-link" data-id="${row.id}">${row.apellidos ?? ''}, ${row.nombre ?? ''}</button></td>
       <td>${row.email ?? ''}</td>
       <td>${row.asociacion ? asociacionLabel(row.asociacion) : ''}</td>
-      <td>${habilidades}</td>
-      <td>${row.disponibilidad ?? ''}</td>
       ${SENSITIVE_COLUMNS.map((c) => `<td class="sensitive">${row[c.key] ?? ''}</td>`).join('')}
     </tr>`;
     })
