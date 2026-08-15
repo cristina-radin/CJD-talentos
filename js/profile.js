@@ -154,8 +154,7 @@ function formHtml(m, options) {
           ${comboFieldHtml('p-ciudad', 'Ciudad', options.ciudad, m.ciudad)}
           <div>
             <label for="p-coche">Coche</label>
-            <select id="p-coche">
-              <option value="">Sin especificar</option>
+            <select id="p-coche" required>
               ${COCHE_OPCIONES.map((c) => `<option value="${c}" ${m.coche === c ? 'selected' : ''}>${toSentenceCase(c)}</option>`).join('')}
             </select>
           </div>
@@ -400,12 +399,15 @@ export async function initProfile(session) {
 
     const { error: updateError } = await supabase.from('members').update(updates).eq('email', email);
 
-    submitBtn.disabled = false;
-
     if (updateError) {
+      submitBtn.disabled = false;
       showMsg('No se pudo guardar: ' + updateError.message, true);
       return;
     }
+
+    // Vuelve a cargar la ficha (y las opciones de los desplegables, por si
+    // se añadió un valor nuevo) para que se vea todo actualizado al momento.
+    await initProfile(session);
     showMsg('Cambios guardados.', false);
   });
 }
