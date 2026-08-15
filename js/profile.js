@@ -268,6 +268,10 @@ function formHtml(m, options, isAdminEditing) {
               <input type="checkbox" id="p-es-menor" ${m.es_menor ? 'checked' : ''} />
               Es menor de edad
             </label>
+            <label for="p-ocd">
+              <input type="checkbox" id="p-ocd" ${m.ocd ? 'checked' : ''} />
+              OCD
+            </label>
           </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
@@ -531,6 +535,7 @@ export async function initProfile(session, opts = {}) {
       alergias: alergiasList.length ? alergiasList.join(', ') : null,
       observaciones: document.getElementById('p-observaciones').value.trim() || null,
       es_menor: document.getElementById('p-es-menor').checked,
+      ocd: document.getElementById('p-ocd').checked,
     };
 
     if (isAdminEditing) {
