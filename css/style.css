@@ -148,7 +148,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
 label {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text);
   display: block;
   margin-bottom: 4px;
 }
@@ -392,7 +392,7 @@ dialog.lightbox img {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: var(--text);
   margin-bottom: 4px;
 }
 
