@@ -136,6 +136,23 @@ function renderFilters() {
   document.getElementById('f-ocd').addEventListener('change', applyFilters);
 }
 
+// Campos que la tarjeta compacta no muestra por defecto. Si una búsqueda
+// por palabra clave encuentra la coincidencia en uno de estos, se enseña
+// ese campo directamente en la tarjeta para no tener que abrir la ficha.
+const KEYWORD_REVEAL_FIELDS = [
+  { key: 'experiencia', label: 'Experiencia' },
+  { key: 'hobbies', label: 'Hobbies' },
+  { key: 'disponibilidad', label: 'Disponibilidad' },
+  { key: 'habilidades_humanas', label: 'Habilidades humanas' },
+  { key: 'habilidades_cristianas', label: 'Habilidades cristianas' },
+];
+
+function matchingRevealFields(m, keyword) {
+  if (!keyword) return [];
+  const nq = normalizeText(keyword);
+  return KEYWORD_REVEAL_FIELDS.filter(({ key }) => m[key] && normalizeText(m[key]).includes(nq));
+}
+
 function applyFilters() {
   const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
   const ciudad = document.getElementById('f-ciudad').value;
@@ -166,7 +183,7 @@ function applyFilters() {
     return true;
   });
 
-  renderResults(filtered);
+  renderResults(filtered, keyword);
 }
 
 function lugarYFormacion(m) {
@@ -176,7 +193,7 @@ function lugarYFormacion(m) {
   return { lugar, formacion };
 }
 
-function renderResults(members) {
+function renderResults(members, keyword = '') {
   const grid = document.getElementById('search-results');
   const countLine = document.getElementById('search-count');
   countLine.textContent = `${members.length} persona${members.length === 1 ? '' : 's'} encontrada${members.length === 1 ? '' : 's'}`;
@@ -190,6 +207,7 @@ function renderResults(members) {
     .map((m) => {
       const estilos = Array.isArray(m.estilos) ? m.estilos : [];
       const { lugar, formacion } = lugarYFormacion(m);
+      const revealFields = matchingRevealFields(m, keyword);
 
       return `
         <div class="member-card" data-id="${m.id}">
@@ -199,6 +217,7 @@ function renderResults(members) {
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
           ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
+          ${revealFields.map(({ key, label }) => `<div class="card-section"><span class="card-label">${label}</span><p>${m[key]}</p></div>`).join('')}
         </div>
       `;
     })
