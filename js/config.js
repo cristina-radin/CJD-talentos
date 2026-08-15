@@ -32,7 +32,7 @@ export const NIVELES_IDIOMA = ['Básico', 'Intermedio', 'Avanzado'];
 
 // Coche: lista cerrada, sin opción de "otra". Cada valor ya se basta solo
 // como frase (por eso no se le pone la etiqueta "Coche:" delante al mostrarlo).
-export const COCHE_OPCIONES = ['CON CARNÉ, SIN COCHE', 'CON CARNÉ CON COCHE', 'SIN CARNÉ'];
+export const COCHE_OPCIONES = ['CON CARNÉ, SIN COCHE', 'CON CARNÉ, CON COCHE', 'SIN CARNÉ'];
 
 // Área de titulación: las 5 ramas de conocimiento oficiales usadas en las
 // universidades españolas. Lista cerrada, sin "otra" — si a alguien no le
