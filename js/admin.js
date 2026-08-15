@@ -27,6 +27,7 @@ const SENSITIVE_COLUMNS = [
   { key: 'nif', label: 'DNI' },
   { key: 'domicilio', label: 'Domicilio' },
   { key: 'nacimiento', label: 'Nacimiento' },
+  { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No') },
   { key: 'alergias', label: 'Alergias' },
   { key: 'observaciones', label: 'Observaciones' },
 ];
@@ -111,6 +112,7 @@ function renderDetail(row) {
         ${detailField('Teléfono', row.telefono)}
         ${detailField('DNI', row.nif)}
         ${detailField('Fecha de nacimiento', row.nacimiento)}
+        ${detailField('Menor de edad', row.es_menor ? 'Sí' : 'No')}
         <div class="full">${detailField('Domicilio', row.domicilio)}</div>
         <div class="full">${detailField('Alergias', row.alergias)}</div>
         <div class="full">${detailField('Observaciones', row.observaciones)}</div>
@@ -194,7 +196,7 @@ function renderTable(rows) {
       <td><button type="button" class="admin-name-link" data-id="${row.id}">${row.apellidos ?? ''}, ${row.nombre ?? ''}</button></td>
       <td>${row.email ?? ''}</td>
       <td>${row.asociacion ? asociacionLabel(row.asociacion) : ''}</td>
-      ${SENSITIVE_COLUMNS.map((c) => `<td class="sensitive">${row[c.key] ?? ''}</td>`).join('')}
+      ${SENSITIVE_COLUMNS.map((c) => `<td class="sensitive">${c.format ? c.format(row[c.key]) : (row[c.key] ?? '')}</td>`).join('')}
     </tr>`;
     })
     .join('');

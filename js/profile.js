@@ -263,6 +263,12 @@ function formHtml(m, options, isAdminEditing) {
             <label for="p-nacimiento-dia">Fecha de nacimiento</label>
             ${nacimientoFieldsHtml(m.nacimiento)}
           </div>
+          <div class="checkbox-row">
+            <label for="p-es-menor">
+              <input type="checkbox" id="p-es-menor" ${m.es_menor ? 'checked' : ''} />
+              Es menor de edad
+            </label>
+          </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
             <input type="text" id="p-domicilio" placeholder="C/ Mayor 12, 3ºB, Valencia" value="${m.domicilio ?? ''}" />
@@ -524,6 +530,7 @@ export async function initProfile(session, opts = {}) {
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
       alergias: alergiasList.length ? alergiasList.join(', ') : null,
       observaciones: document.getElementById('p-observaciones').value.trim() || null,
+      es_menor: document.getElementById('p-es-menor').checked,
     };
 
     if (isAdminEditing) {

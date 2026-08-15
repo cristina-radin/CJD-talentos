@@ -12,6 +12,28 @@ function distinctValues(rows, field) {
   );
 }
 
+function matchesKeyword(m, q) {
+  const haystack = [
+    m.nombre,
+    m.apellidos,
+    m.ciudad,
+    m.area_titulacion,
+    m.titulacion,
+    m.coche,
+    m.experiencia,
+    m.hobbies,
+    m.disponibilidad,
+    m.habilidades_humanas,
+    m.habilidades_cristianas,
+    ...(Array.isArray(m.estilos) ? m.estilos.map(estiloLabel) : []),
+    ...(Array.isArray(m.idiomas) ? m.idiomas.map(formatIdiomaEntry) : []),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(q);
+}
+
 function buildSelect(id, labelText, values, labelFn = (v) => v) {
   const wrap = document.createElement('div');
   wrap.className = 'field';
@@ -37,6 +59,13 @@ function renderFilters() {
   nombreWrap.innerHTML = `
     <label for="f-nombre">Nombre</label>
     <input type="text" id="f-nombre" placeholder="Buscar por nombre…" />
+  `;
+
+  const keywordWrap = document.createElement('div');
+  keywordWrap.className = 'field';
+  keywordWrap.innerHTML = `
+    <label for="f-keyword">Palabra clave</label>
+    <input type="text" id="f-keyword" placeholder="Busca en experiencia, hobbies, habilidades…" />
   `;
 
   const { wrap: ciudadWrap, select: ciudadSelect } = buildSelect(
@@ -89,6 +118,7 @@ function renderFilters() {
   estilosWrap.appendChild(checkRow);
 
   filtersEl.appendChild(nombreWrap);
+  filtersEl.appendChild(keywordWrap);
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
   filtersEl.appendChild(cocheWrap);
@@ -101,10 +131,12 @@ function renderFilters() {
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
   document.getElementById('f-nombre').addEventListener('input', applyFilters);
+  document.getElementById('f-keyword').addEventListener('input', applyFilters);
 }
 
 function applyFilters() {
   const nombre = document.getElementById('f-nombre').value.trim().toLowerCase();
+  const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
   const ciudad = document.getElementById('f-ciudad').value;
   const area = document.getElementById('f-area').value;
   const coche = document.getElementById('f-coche').value;
@@ -113,6 +145,7 @@ function applyFilters() {
 
   const filtered = allMembers.filter((m) => {
     if (nombre && !`${m.nombre ?? ''} ${m.apellidos ?? ''}`.toLowerCase().includes(nombre)) return false;
+    if (keyword && !matchesKeyword(m, keyword)) return false;
     if (ciudad && m.ciudad !== ciudad) return false;
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
