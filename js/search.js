@@ -137,26 +137,21 @@ function renderResults(members) {
     .map((m) => {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
       const estilos = Array.isArray(m.estilos) ? m.estilos : [];
+      const titulaciones = m.titulacion ? m.titulacion.split(',').map((t) => t.trim()).filter(Boolean) : [];
+      const lugar = [m.ciudad, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ');
+      const formacion = [m.area_titulacion, titulaciones.join(', ') || null].filter(Boolean).join(' · ');
+
       return `
         <div class="member-card">
           ${m.foto_url ? `<img class="member-photo" src="${m.foto_url}" alt="Foto de ${m.nombre ?? ''}" data-full="${m.foto_url}" />` : ''}
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
-          <div class="meta">
-            ${[m.ciudad, m.area_titulacion, m.titulacion, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ')}
-          </div>
+          ${lugar ? `<div class="meta">${lugar}</div>` : ''}
+          ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-          ${
-            estilos.length
-              ? `<div class="card-section"><span class="card-label">Estilo de pensamiento</span><div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div></div>`
-              : ''
-          }
-          ${
-            idiomas.length
-              ? `<div class="card-section"><span class="card-label">Idiomas</span><div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div></div>`
-              : ''
-          }
-          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
-          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
+          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag tag-solid">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+          ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
+          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p><em>${m.experiencia}</em></p></div>` : ''}
+          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p><em>${m.hobbies}</em></p></div>` : ''}
         </div>
       `;
     })

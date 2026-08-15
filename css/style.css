@@ -410,6 +410,12 @@ dialog.lightbox img {
   font-size: 0.78rem;
 }
 
+.tag.tag-solid {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg);
+}
+
 .tag button {
   background: none;
   border: none;
