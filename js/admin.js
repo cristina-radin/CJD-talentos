@@ -82,7 +82,7 @@ function renderDetail(row) {
         }
         ${
           idiomas.length
-            ? `<div class="full"><label>Idiomas</label><p><em>${idiomas.map(formatIdiomaEntry).join(', ')}</em></p></div>`
+            ? `<div class="full">${detailField('Idiomas', idiomas.map(formatIdiomaEntry).join(', '))}</div>`
             : ''
         }
       </div>

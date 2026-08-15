@@ -148,8 +148,8 @@ function renderResults(members) {
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
+          ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
           ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
-          ${idiomas.length ? `<p><em>${idiomas.map(formatIdiomaEntry).join(', ')}</em></p>` : ''}
           ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
           ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
         </div>
