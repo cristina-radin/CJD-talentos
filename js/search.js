@@ -113,8 +113,9 @@ function renderFilters() {
   ocdWrap.className = 'field';
   ocdWrap.style.gridColumn = '1 / -1';
   ocdWrap.innerHTML = `
+    <label>OCD</label>
     <div class="checkbox-row">
-      <label><input type="checkbox" id="f-ocd" /> OCD</label>
+      <label><input type="checkbox" id="f-ocd" /> Mostrar solo OCD</label>
     </div>
   `;
 
