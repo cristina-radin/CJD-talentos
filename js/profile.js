@@ -9,7 +9,7 @@ let idiomasList = [];
 // cada quien escriba la misma ciudad/coche/área de formas distintas
 // (acentos, mayúsculas, erratas) mientras sigue permitiendo dar de alta
 // valores nuevos que aún no existan.
-function comboFieldHtml(id, labelText, options, currentValue, { labelFn = (v) => v, multiline = false, wrapClass = '' } = {}) {
+function comboFieldHtml(id, labelText, options, currentValue, { labelFn = (v) => v, multiline = false, wrapClass = '', allowBlank = true } = {}) {
   const isKnown = currentValue && options.includes(currentValue);
   const isOtro = Boolean(currentValue) && !isKnown;
   const optsHtml = options
@@ -23,7 +23,7 @@ function comboFieldHtml(id, labelText, options, currentValue, { labelFn = (v) =>
     <div class="${wrapClass}">
       <label for="${id}">${labelText}</label>
       <select id="${id}">
-        <option value="">Sin especificar</option>
+        ${allowBlank ? '<option value="">Sin especificar</option>' : ''}
         ${optsHtml}
         <option value="__otro__" ${isOtro ? 'selected' : ''}>Otra… (escribir)</option>
       </select>
@@ -214,7 +214,7 @@ function formHtml(m, options) {
             <input type="text" id="p-telefono" value="${m.telefono ?? ''}" />
           </div>
           <div>
-            <label for="p-nif">NIF</label>
+            <label for="p-nif">DNI</label>
             <input type="text" id="p-nif" value="${m.nif ?? ''}" />
           </div>
           <div>
@@ -225,7 +225,7 @@ function formHtml(m, options) {
             <label for="p-domicilio">Domicilio</label>
             <input type="text" id="p-domicilio" placeholder="C/ Mayor 12, 3ºB, Valencia" value="${m.domicilio ?? ''}" />
           </div>
-          ${comboFieldHtml('p-alergias', 'Alergias', options.alergias, m.alergias, { multiline: true, wrapClass: 'full' })}
+          ${comboFieldHtml('p-alergias', 'Alergias', options.alergias, m.alergias, { multiline: true, wrapClass: 'full', allowBlank: false })}
         </div>
       </fieldset>
 

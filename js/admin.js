@@ -15,7 +15,7 @@ function formatDate(value) {
 
 const SENSITIVE_COLUMNS = [
   { key: 'telefono', label: 'Teléfono' },
-  { key: 'nif', label: 'NIF' },
+  { key: 'nif', label: 'DNI' },
   { key: 'domicilio', label: 'Domicilio' },
   { key: 'nacimiento', label: 'Nacimiento' },
   { key: 'alergias', label: 'Alergias' },
@@ -92,7 +92,7 @@ function renderDetail(row) {
       <legend>Datos sensibles</legend>
       <div class="form-grid">
         ${detailField('Teléfono', row.telefono)}
-        ${detailField('NIF', row.nif)}
+        ${detailField('DNI', row.nif)}
         ${detailField('Fecha de nacimiento', row.nacimiento)}
         <div class="full">${detailField('Domicilio', row.domicilio)}</div>
         <div class="full">${detailField('Alergias', row.alergias)}</div>
