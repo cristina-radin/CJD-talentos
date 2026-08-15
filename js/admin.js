@@ -77,12 +77,12 @@ function renderDetail(row) {
         <div class="full">${detailField('Hobbies', row.hobbies)}</div>
         ${
           estilos.length
-            ? `<div class="full"><label>Estilo de pensamiento</label><div class="tag-list">${estilos.map((e) => `<span class="tag tag-solid">${estiloLabel(e)}</span>`).join('')}</div></div>`
+            ? `<div class="full"><label>Estilo de pensamiento</label><div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div></div>`
             : ''
         }
         ${
           idiomas.length
-            ? `<div class="full"><label>Idiomas</label><div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div></div>`
+            ? `<div class="full"><label>Idiomas</label><p><em>${idiomas.map(formatIdiomaEntry).join(', ')}</em></p></div>`
             : ''
         }
       </div>

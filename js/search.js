@@ -148,10 +148,10 @@ function renderResults(members) {
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag tag-solid">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
-          ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
-          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p><em>${m.experiencia}</em></p></div>` : ''}
-          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p><em>${m.hobbies}</em></p></div>` : ''}
+          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+          ${idiomas.length ? `<p><em>${idiomas.map(formatIdiomaEntry).join(', ')}</em></p>` : ''}
+          ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
+          ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
         </div>
       `;
     })
