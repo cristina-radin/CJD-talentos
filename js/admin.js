@@ -285,7 +285,11 @@ function renderFixValues(panel, field) {
   allMembers.forEach((row) => {
     const v = row[field];
     if (!v) return;
-    counts.set(v, (counts.get(v) ?? 0) + 1);
+    // alergias y titulación pueden tener varios valores separados por comas
+    // en el mismo campo; ciudad es de un solo valor.
+    const multivalor = field === 'alergias' || field === 'titulacion';
+    const tokens = multivalor ? v.split(',').map((t) => t.trim()).filter(Boolean) : [v];
+    tokens.forEach((token) => counts.set(token, (counts.get(token) ?? 0) + 1));
   });
 
   const rows = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es'));

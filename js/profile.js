@@ -3,6 +3,8 @@ import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION
 import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
+let alergiasList = [];
+let titulacionesList = [];
 
 // Campo "combo": desplegable con los valores ya existentes en la base de
 // datos + una opción "Otra…" que revela un campo de texto libre. Evita que
@@ -97,23 +99,35 @@ function nacimientoValue() {
   return `${dia}/${mes}/${anio}`;
 }
 
-function renderIdiomasTags() {
-  const box = document.getElementById('p-idiomas-tags');
+function renderTagList(boxId, list, labelFn, rerender) {
+  const box = document.getElementById(boxId);
   box.innerHTML = '';
-  idiomasList.forEach((entry, idx) => {
+  list.forEach((entry, idx) => {
     const chip = document.createElement('span');
     chip.className = 'tag';
-    chip.textContent = formatIdiomaEntry(entry);
+    chip.textContent = labelFn(entry);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', () => {
-      idiomasList.splice(idx, 1);
-      renderIdiomasTags();
+      list.splice(idx, 1);
+      rerender();
     });
     chip.appendChild(removeBtn);
     box.appendChild(chip);
   });
+}
+
+function renderIdiomasTags() {
+  renderTagList('p-idiomas-tags', idiomasList, formatIdiomaEntry, renderIdiomasTags);
+}
+
+function renderAlergiasTags() {
+  renderTagList('p-alergias-tags', alergiasList, (v) => v, renderAlergiasTags);
+}
+
+function renderTitulacionesTags() {
+  renderTagList('p-titulaciones-tags', titulacionesList, (v) => v, renderTitulacionesTags);
 }
 
 function formHtml(m, options) {
@@ -172,7 +186,19 @@ function formHtml(m, options) {
               ${AREAS_TITULACION.map((a) => `<option value="${a}" ${m.area_titulacion === a ? 'selected' : ''}>${a}</option>`).join('')}
             </select>
           </div>
-          ${comboFieldHtml('p-titulacion', 'Titulación', options.titulacion, m.titulacion)}
+          <div class="full">
+            <label>Titulación</label>
+            <div class="tag-list" id="p-titulaciones-tags"></div>
+            <div class="tag-input-row">
+              <select id="p-titulacion-select">
+                <option value="">Elige o añade…</option>
+                ${options.titulacion.map((t) => `<option value="${t}">${t}</option>`).join('')}
+                <option value="__otro__">Otra… (escribir)</option>
+              </select>
+              <input type="text" id="p-titulacion-otro" placeholder="Escribe la titulación" style="display:none" />
+              <button type="button" class="btn secondary" id="p-titulacion-add">Añadir</button>
+            </div>
+          </div>
           <div class="full">
             <label for="p-experiencia">Experiencia</label>
             <textarea id="p-experiencia" placeholder="Sepára los puntos con comas, p.ej: diseño gráfico, gestión de equipos, marketing">${m.experiencia ?? ''}</textarea>
@@ -225,7 +251,19 @@ function formHtml(m, options) {
             <label for="p-domicilio">Domicilio</label>
             <input type="text" id="p-domicilio" placeholder="C/ Mayor 12, 3ºB, Valencia" value="${m.domicilio ?? ''}" />
           </div>
-          ${comboFieldHtml('p-alergias', 'Alergias', options.alergias, m.alergias, { multiline: true, wrapClass: 'full', allowBlank: false })}
+          <div class="full">
+            <label>Alergias</label>
+            <div class="tag-list" id="p-alergias-tags"></div>
+            <div class="tag-input-row">
+              <select id="p-alergia-select">
+                <option value="">Elige o añade…</option>
+                ${options.alergias.map((a) => `<option value="${a}">${a}</option>`).join('')}
+                <option value="__otro__">Otra… (escribir)</option>
+              </select>
+              <input type="text" id="p-alergia-otro" placeholder="Escribe la alergia" style="display:none" />
+              <button type="button" class="btn secondary" id="p-alergia-add">Añadir</button>
+            </div>
+          </div>
         </div>
       </fieldset>
 
@@ -268,6 +306,14 @@ export async function initProfile(session) {
   }
 
   idiomasList = Array.isArray(member.idiomas) ? [...member.idiomas] : [];
+  alergiasList = (member.alergias ?? '')
+    .split(',')
+    .map((a) => a.trim())
+    .filter(Boolean);
+  titulacionesList = (member.titulacion ?? '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 
   const [{ data: allMembers }, { data: alergiasExistentes }] = await Promise.all([
     supabase.rpc('get_directory'),
@@ -278,6 +324,19 @@ export async function initProfile(session) {
     [...new Set((allMembers ?? []).map((r) => r[field]).filter(Boolean))].sort((a, b) =>
       a.localeCompare(b, 'es')
     );
+
+  // Para campos que ahora admiten varios valores separados por comas en el
+  // mismo texto (titulacion), hay que separar antes de sacar la lista de
+  // sugerencias, si no cada combinación completa saldría como una opción.
+  const distinctTokens = (field) =>
+    [
+      ...new Set(
+        (allMembers ?? [])
+          .flatMap((r) => (r[field] ?? '').split(','))
+          .map((v) => v.trim())
+          .filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b, 'es'));
 
   const idiomaNombres = [
     ...new Set(
@@ -290,20 +349,66 @@ export async function initProfile(session) {
 
   const options = {
     ciudad: distinct('ciudad'),
-    titulacion: distinct('titulacion'),
+    titulacion: distinctTokens('titulacion'),
     idiomas: idiomaNombres,
     alergias: [...new Set([...ALERGIAS_RAPIDAS, ...(alergiasExistentes ?? [])])],
   };
 
   content.innerHTML = formHtml(member, options);
   renderIdiomasTags();
-  ['p-ciudad', 'p-titulacion', 'p-alergias'].forEach(wireComboField);
+  renderAlergiasTags();
+  renderTitulacionesTags();
+  ['p-ciudad'].forEach(wireComboField);
 
   document.getElementById('p-idioma-select').addEventListener('change', (e) => {
     const otro = document.getElementById('p-idioma-nombre-otro');
     const showOtro = e.target.value === '__otro__';
     otro.style.display = showOtro ? '' : 'none';
     if (showOtro) otro.focus();
+  });
+
+  document.getElementById('p-alergia-select').addEventListener('change', (e) => {
+    const otro = document.getElementById('p-alergia-otro');
+    const showOtro = e.target.value === '__otro__';
+    otro.style.display = showOtro ? '' : 'none';
+    if (showOtro) otro.focus();
+  });
+
+  document.getElementById('p-alergia-add').addEventListener('click', () => {
+    const select = document.getElementById('p-alergia-select');
+    const otroInput = document.getElementById('p-alergia-otro');
+
+    const value = select.value === '__otro__' ? otroInput.value.trim() : select.value;
+    if (!value || alergiasList.includes(value)) return;
+
+    alergiasList.push(value);
+
+    select.value = '';
+    otroInput.value = '';
+    otroInput.style.display = 'none';
+    renderAlergiasTags();
+  });
+
+  document.getElementById('p-titulacion-select').addEventListener('change', (e) => {
+    const otro = document.getElementById('p-titulacion-otro');
+    const showOtro = e.target.value === '__otro__';
+    otro.style.display = showOtro ? '' : 'none';
+    if (showOtro) otro.focus();
+  });
+
+  document.getElementById('p-titulacion-add').addEventListener('click', () => {
+    const select = document.getElementById('p-titulacion-select');
+    const otroInput = document.getElementById('p-titulacion-otro');
+
+    const value = select.value === '__otro__' ? otroInput.value.trim() : select.value;
+    if (!value || titulacionesList.includes(value)) return;
+
+    titulacionesList.push(value);
+
+    select.value = '';
+    otroInput.value = '';
+    otroInput.style.display = 'none';
+    renderTitulacionesTags();
   });
 
   document.getElementById('p-foto-input').addEventListener('change', async (e) => {
@@ -385,7 +490,7 @@ export async function initProfile(session) {
       coche: document.getElementById('p-coche').value || null,
       asociacion: document.getElementById('p-asociacion').value || null,
       area_titulacion: document.getElementById('p-area').value || null,
-      titulacion: comboFieldValue('p-titulacion'),
+      titulacion: titulacionesList.length ? titulacionesList.join(', ') : null,
       experiencia: document.getElementById('p-experiencia').value.trim() || null,
       hobbies: document.getElementById('p-hobbies').value.trim() || null,
       estilos,
@@ -394,7 +499,7 @@ export async function initProfile(session) {
       nif: document.getElementById('p-nif').value.trim() || null,
       nacimiento: nacimientoValue(),
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
-      alergias: comboFieldValue('p-alergias'),
+      alergias: alergiasList.length ? alergiasList.join(', ') : null,
     };
 
     const { error: updateError } = await supabase.from('members').update(updates).eq('email', email);
