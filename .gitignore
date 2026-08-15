@@ -3,3 +3,4 @@
 # phone numbers, etc. — keep those files outside this folder, but this is
 # a safety net in case one ends up here by accident.
 *.csv
+__pycache__/

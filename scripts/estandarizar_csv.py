@@ -81,6 +81,18 @@ def normalize(text):
     return re.sub(r'\s+', ' ', text).strip().lower()
 
 
+def arreglar_mojibake(texto):
+    """Corrige acentos rotos tipo 'CastellÃ³n' que vienen de un archivo que
+    pasó por Excel/Sheets con la codificación mal detectada en algún paso
+    anterior. Si el texto no tiene pinta de estar afectado, se deja igual."""
+    if not texto or 'Ã' not in texto:
+        return texto
+    try:
+        return texto.encode('latin-1').decode('utf-8')
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return texto
+
+
 # --- Nombre y apellidos ---
 
 def split_nombre_apellidos(full_name):
@@ -183,9 +195,8 @@ def parse_area_titulacion(texto_estudios):
 
 
 def parse_titulacion(texto_estudios):
-    # Texto libre pasado tal cual (solo se limpian espacios repetidos).
-    # Siempre se marca para revisar: no hay forma fiable de saber si el
-    # texto entero es una titulación limpia o incluye ruido de alrededor.
+    # Texto libre pasado tal cual (solo se limpian espacios repetidos). No
+    # se marca para revisar: es texto tal cual, no una adivinanza.
     texto = re.sub(r'\s+', ' ', (texto_estudios or '')).strip()
     return texto or None
 
@@ -261,8 +272,6 @@ def procesar_fila(fila):
         revisar.append('area_titulacion')
 
     titulacion = parse_titulacion(fila.get(COL_ESTUDIOS))
-    if titulacion:
-        revisar.append('titulacion')
 
     idiomas, dudas_idiomas = parse_idiomas(fila.get(COL_IDIOMAS))
     if dudas_idiomas:
@@ -297,21 +306,42 @@ def procesar_fila(fila):
     }
 
 
+def leer_filas_csv(ruta):
+    """Lee un CSV probando varias codificaciones (los CSV exportados desde
+    Excel en Windows a veces no son UTF-8) y arregla acentos rotos si los
+    hubiera."""
+    ultimo_error = None
+    for encoding in ('utf-8-sig', 'cp1252', 'latin-1'):
+        try:
+            with open(ruta, newline='', encoding=encoding) as f_in:
+                contenido = f_in.read()
+            break
+        except UnicodeDecodeError as e:
+            ultimo_error = e
+            contenido = None
+    if contenido is None:
+        raise ultimo_error
+
+    try:
+        dialecto = csv.Sniffer().sniff(contenido[:4096], delimiters=',;\t')
+    except csv.Error:
+        dialecto = csv.excel
+
+    lector = csv.DictReader(contenido.splitlines(), dialect=dialecto)
+    filas = []
+    for fila in lector:
+        filas.append({k: arreglar_mojibake(v) for k, v in fila.items()})
+    return filas
+
+
 def main():
     parser = argparse.ArgumentParser(description='Estandariza el CSV del formulario para importar en Supabase.')
     parser.add_argument('entrada', help='Ruta al CSV exportado de Google Forms/Sheets')
     parser.add_argument('salida', help='Ruta donde escribir el CSV limpio')
     args = parser.parse_args()
 
-    with open(args.entrada, newline='', encoding='utf-8-sig') as f_in:
-        muestra = f_in.read(4096)
-        f_in.seek(0)
-        try:
-            dialecto = csv.Sniffer().sniff(muestra, delimiters=',;\t')
-        except csv.Error:
-            dialecto = csv.excel
-        lector = csv.DictReader(f_in, dialect=dialecto)
-        filas_salida = [procesar_fila(fila) for fila in lector]
+    filas_entrada = leer_filas_csv(args.entrada)
+    filas_salida = [procesar_fila(fila) for fila in filas_entrada]
 
     with open(args.salida, 'w', newline='', encoding='utf-8') as f_out:
         escritor = csv.DictWriter(f_out, fieldnames=OUTPUT_COLUMNS)
