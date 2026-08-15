@@ -91,6 +91,10 @@ function renderFilters() {
     <input type="text" id="f-idioma" placeholder="p.ej. inglés" />
   `;
 
+  const { wrap: ocdWrap, select: ocdSelect } = buildSelect('f-ocd', 'OCD', ['true', 'false'], (v) =>
+    v === 'true' ? 'Sí' : 'No'
+  );
+
   const estilosWrap = document.createElement('div');
   estilosWrap.className = 'field';
   estilosWrap.style.gridColumn = '1 / -1';
@@ -116,9 +120,10 @@ function renderFilters() {
   filtersEl.appendChild(cocheWrap);
   filtersEl.appendChild(asociacionWrap);
   filtersEl.appendChild(idiomaWrap);
+  filtersEl.appendChild(ocdWrap);
   filtersEl.appendChild(estilosWrap);
 
-  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect].forEach((sel) =>
+  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect, ocdSelect].forEach((sel) =>
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
@@ -132,6 +137,7 @@ function applyFilters() {
   const coche = document.getElementById('f-coche').value;
   const asociacion = document.getElementById('f-asociacion').value;
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
+  const ocd = document.getElementById('f-ocd').value;
 
   const filtered = allMembers.filter((m) => {
     if (keyword && !matchesKeyword(m, keyword)) return false;
@@ -139,6 +145,7 @@ function applyFilters() {
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
     if (asociacion && m.asociacion !== asociacion) return false;
+    if (ocd && String(Boolean(m.ocd)) !== ocd) return false;
 
     if (idioma) {
       const idiomas = Array.isArray(m.idiomas) ? m.idiomas : [];
@@ -185,7 +192,7 @@ function renderResults(members) {
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-          ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+          ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
         </div>
       `;
     })
@@ -217,7 +224,7 @@ function renderFullDetail(m) {
     ${lugar ? `<div class="meta">${lugar}</div>` : ''}
     ${formacion ? `<div class="meta">${formacion}</div>` : ''}
     ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-    ${estilos.length ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div>` : ''}
+    ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
     ${idiomas.length ? `<div class="meta">${idiomas.map(formatIdiomaEntry).join(', ')}</div>` : ''}
     ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
     ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}

@@ -227,6 +227,12 @@ function formHtml(m, options, isAdminEditing) {
             <label>Estilo de pensamiento${isAdminEditing ? '' : ' (no editable)'}</label>
             <div class="${isAdminEditing ? 'checkbox-row' : 'tag-list'}">${estilosHtml}</div>
           </div>
+          <div class="checkbox-row">
+            <label for="p-ocd">
+              <input type="checkbox" id="p-ocd" ${m.ocd ? 'checked' : ''} />
+              OCD
+            </label>
+          </div>
           <div class="full">
             <label>Idiomas</label>
             <div class="tag-list" id="p-idiomas-tags"></div>
@@ -267,10 +273,6 @@ function formHtml(m, options, isAdminEditing) {
             <label for="p-es-menor">
               <input type="checkbox" id="p-es-menor" ${m.es_menor ? 'checked' : ''} />
               Es menor de edad
-            </label>
-            <label for="p-ocd">
-              <input type="checkbox" id="p-ocd" ${m.ocd ? 'checked' : ''} />
-              OCD
             </label>
           </div>
           <div class="full">

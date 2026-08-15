@@ -28,7 +28,6 @@ const SENSITIVE_COLUMNS = [
   { key: 'domicilio', label: 'Domicilio' },
   { key: 'nacimiento', label: 'Nacimiento' },
   { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No') },
-  { key: 'ocd', label: 'OCD', format: (v) => (v ? 'Sí' : 'No') },
   { key: 'alergias', label: 'Alergias' },
   { key: 'observaciones', label: 'Observaciones' },
 ];
@@ -89,6 +88,7 @@ function renderDetail(row) {
         ${detailField('Área de titulación', row.area_titulacion)}
         ${detailField('Titulación', row.titulacion)}
         ${detailField('Coche', row.coche ? toSentenceCase(row.coche) : '')}
+        ${detailField('OCD', row.ocd ? 'Sí' : 'No')}
         <div class="full">${detailField('Experiencia', row.experiencia)}</div>
         <div class="full">${detailField('Hobbies', row.hobbies)}</div>
         <div class="full">${detailField('Disponibilidad', row.disponibilidad)}</div>
@@ -114,7 +114,6 @@ function renderDetail(row) {
         ${detailField('DNI', row.nif)}
         ${detailField('Fecha de nacimiento', row.nacimiento)}
         ${detailField('Menor de edad', row.es_menor ? 'Sí' : 'No')}
-        ${detailField('OCD', row.ocd ? 'Sí' : 'No')}
         <div class="full">${detailField('Domicilio', row.domicilio)}</div>
         <div class="full">${detailField('Alergias', row.alergias)}</div>
         <div class="full">${detailField('Observaciones', row.observaciones)}</div>
