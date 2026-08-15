@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
+import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
 import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
@@ -130,11 +130,19 @@ function renderTitulacionesTags() {
   renderTagList('p-titulaciones-tags', titulacionesList, (v) => v, renderTitulacionesTags);
 }
 
-function formHtml(m, options) {
+function formHtml(m, options, isAdminEditing) {
   const estilosActuales = Array.isArray(m.estilos) ? m.estilos : [];
-  const estilosHtml = estilosActuales.length
-    ? estilosActuales.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')
-    : '<span class="empty-state" style="padding:0">Sin asignar</span>';
+  const estilosHtml = isAdminEditing
+    ? ESTILOS.map(
+        (estilo) => `
+        <label>
+          <input type="checkbox" class="p-estilo" value="${estilo}" ${estilosActuales.includes(estilo) ? 'checked' : ''} />
+          ${estiloLabel(estilo)}
+        </label>`
+      ).join('')
+    : estilosActuales.length
+      ? estilosActuales.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')
+      : '<span class="empty-state" style="padding:0">Sin asignar</span>';
 
   const asociacionOptions = ASOCIACIONES.map(
     (a) => `<option value="${a}" ${m.asociacion === a ? 'selected' : ''}>${asociacionLabel(a)}</option>`
@@ -149,7 +157,7 @@ function formHtml(m, options) {
             <label>Foto</label>
             <div class="photo-upload-row">
               <img id="p-foto-preview" class="photo-preview" src="${m.foto_url ?? ''}" alt="" style="${m.foto_url ? '' : 'display:none'}" />
-              <input type="file" id="p-foto-input" accept="image/*" />
+              ${isAdminEditing ? '' : '<input type="file" id="p-foto-input" accept="image/*" />'}
             </div>
             <div class="msg" id="p-foto-msg"></div>
           </div>
@@ -216,8 +224,8 @@ function formHtml(m, options) {
             <textarea id="p-habilidades-cristianas">${m.habilidades_cristianas ?? ''}</textarea>
           </div>
           <div class="full">
-            <label>Estilo de pensamiento (no editable)</label>
-            <div class="tag-list">${estilosHtml}</div>
+            <label>Estilo de pensamiento${isAdminEditing ? '' : ' (no editable)'}</label>
+            <div class="${isAdminEditing ? 'checkbox-row' : 'tag-list'}">${estilosHtml}</div>
           </div>
           <div class="full">
             <label>Idiomas</label>
@@ -291,11 +299,12 @@ function showMsg(text, isError) {
   el.className = 'msg show ' + (isError ? 'error' : 'ok');
 }
 
-export async function initProfile(session) {
-  const content = document.getElementById('profile-content');
-  content.innerHTML = '<p class="empty-state">Cargando tu ficha…</p>';
+export async function initProfile(session, opts = {}) {
+  const { targetEmail = null, containerId = 'profile-content', isAdminEditing = false, onSaved = null } = opts;
+  const content = document.getElementById(containerId);
+  content.innerHTML = '<p class="empty-state">Cargando ficha…</p>';
 
-  const email = session.user.email;
+  const email = targetEmail ?? session.user.email;
   const { data: member, error } = await supabase
     .from('members')
     .select('*')
@@ -303,12 +312,14 @@ export async function initProfile(session) {
     .maybeSingle();
 
   if (error) {
-    content.innerHTML = `<div class="empty-state">Error al cargar tu ficha: ${error.message}</div>`;
+    content.innerHTML = `<div class="empty-state">Error al cargar la ficha: ${error.message}</div>`;
     return;
   }
 
   if (!member) {
-    content.innerHTML = `
+    content.innerHTML = isAdminEditing
+      ? `<div class="empty-state">No se encontró ninguna ficha con el email <strong>${email}</strong>.</div>`
+      : `
       <div class="empty-state">
         No hemos encontrado ninguna ficha en la bolsa de talentos con el email
         <strong>${email}</strong>. Pide a un administrador que te dé de alta con ese
@@ -366,7 +377,7 @@ export async function initProfile(session) {
     alergias: [...new Set([...ALERGIAS_RAPIDAS, ...(alergiasExistentes ?? [])])],
   };
 
-  content.innerHTML = formHtml(member, options);
+  content.innerHTML = formHtml(member, options, isAdminEditing);
   renderIdiomasTags();
   renderAlergiasTags();
   renderTitulacionesTags();
@@ -423,7 +434,7 @@ export async function initProfile(session) {
     renderTitulacionesTags();
   });
 
-  document.getElementById('p-foto-input').addEventListener('change', async (e) => {
+  document.getElementById('p-foto-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -515,6 +526,10 @@ export async function initProfile(session) {
       observaciones: document.getElementById('p-observaciones').value.trim() || null,
     };
 
+    if (isAdminEditing) {
+      updates.estilos = [...document.querySelectorAll('.p-estilo:checked')].map((el) => el.value);
+    }
+
     const { error: updateError } = await supabase.from('members').update(updates).eq('email', email);
 
     if (updateError) {
@@ -525,7 +540,8 @@ export async function initProfile(session) {
 
     // Vuelve a cargar la ficha (y las opciones de los desplegables, por si
     // se añadió un valor nuevo) para que se vea todo actualizado al momento.
-    await initProfile(session);
+    await initProfile(session, opts);
     showMsg('Cambios guardados.', false);
+    onSaved?.();
   });
 }

@@ -1,9 +1,18 @@
 import { supabase } from './supabaseClient.js';
 import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel } from './format.js';
 import { openLightbox } from './lightbox.js';
+import { initProfile } from './profile.js';
 
 let allMembers = [];
 let dialogEl = null;
+let adminSessionPromise = null;
+
+function getAdminSession() {
+  if (!adminSessionPromise) {
+    adminSessionPromise = supabase.auth.getSession().then(({ data }) => data.session);
+  }
+  return adminSessionPromise;
+}
 
 function formatDate(value) {
   if (!value) return '';
@@ -126,12 +135,44 @@ function ensureDialog() {
   return dialogEl;
 }
 
+function showDetailView(body, row) {
+  body.innerHTML = `
+    <button type="button" class="btn secondary admin-edit-btn">Editar ficha</button>
+    ${renderDetail(row)}
+  `;
+  const photo = body.querySelector('.detail-photo');
+  if (photo) photo.addEventListener('click', () => openLightbox(photo.dataset.full));
+
+  body.querySelector('.admin-edit-btn').addEventListener('click', async () => {
+    body.innerHTML = `
+      <button type="button" class="btn secondary admin-back-btn">← Volver</button>
+      <div id="admin-edit-form"></div>
+    `;
+    body.querySelector('.admin-back-btn').addEventListener('click', () => showDetailView(body, row));
+
+    const session = await getAdminSession();
+    initProfile(session, {
+      targetEmail: row.email,
+      containerId: 'admin-edit-form',
+      isAdminEditing: true,
+      onSaved: () => {
+        supabase
+          .from('members')
+          .select('*')
+          .eq('email', row.email)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data) Object.assign(row, data);
+          });
+      },
+    });
+  });
+}
+
 function openDetail(row) {
   const dialog = ensureDialog();
   const body = dialog.querySelector('.member-dialog-body');
-  body.innerHTML = renderDetail(row);
-  const photo = body.querySelector('.detail-photo');
-  if (photo) photo.addEventListener('click', () => openLightbox(photo.dataset.full));
+  showDetailView(body, row);
   dialog.showModal();
 }
 
