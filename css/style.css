@@ -21,26 +21,6 @@
   --font-brand: "Alex Brush", cursive;
 }
 
-html[data-theme="dark"] {
-  --bg: #1c140d;
-  --surface: #2a1f15;
-  --border: #4a3826;
-  --text: #f3e6d3;
-  --text-muted: #c3a482;
-  --heading: #f3d9ac;
-  --primary: #e0b378;
-  --primary-hover: #ecc38d;
-  --header-bg: #120c07;
-  --header-bg-alt: #241a10;
-  --header-text: #f3e6d3;
-  --header-text-muted: #ad9678;
-  --danger: #ff8a80;
-  --danger-bg: #3d1a17;
-  --ok: #8fdf9c;
-  --ok-bg: #16301b;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
 * { box-sizing: border-box; }
 
 body {
@@ -282,36 +262,6 @@ nav.main-tabs button.active {
   gap: 10px;
   font-size: 0.85rem;
   color: var(--header-text-muted);
-}
-
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-  color: var(--text);
-  padding: 0;
-  flex-shrink: 0;
-}
-
-header.app-header .theme-toggle {
-  border-color: var(--header-text-muted);
-  color: var(--header-text);
-}
-
-.theme-toggle-fixed {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
-  background: var(--surface);
 }
 
 main.app-main {
@@ -612,3 +562,4 @@ dialog.member-dialog::backdrop {
 }
 
 .site-footer p { margin: 0; }
+.site-footer p + p { margin-top: 4px; }

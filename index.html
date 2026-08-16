@@ -4,13 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bolsa de Talentos · Carmelo Joven Descalzo</title>
-  <script>
-    (function () {
-      var stored = localStorage.getItem('cjd-theme');
-      var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -23,8 +16,6 @@
   <div class="logo-watermark" aria-hidden="true">
     <img src="assets/logo.png" alt="" onerror="this.parentElement.style.display='none'" />
   </div>
-
-  <button type="button" class="theme-toggle theme-toggle-fixed" id="theme-toggle-btn"></button>
 
   <div class="center-screen">
     <div class="card auth-card">
@@ -82,6 +73,7 @@
 
   <footer class="site-footer">
     <p>Bolsa de Talentos de Carmelo Joven Descalzo — herramienta interna. Los datos que contiene son de uso exclusivo del grupo y no se comparten con terceros.</p>
+    <p>© 2026 Carmelo Joven Descalzo · Contacto: Cristina Radin</p>
   </footer>
 
   <script type="module" src="js/login.js"></script>
