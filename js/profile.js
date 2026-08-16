@@ -113,8 +113,7 @@ function calcEsMenor(nacimientoStr) {
 }
 
 function esMenorIndicatorHtml(nacimientoStr) {
-  const esMenor = calcEsMenor(nacimientoStr);
-  return `${esMenor ? 'Sí' : 'No'} <span style="color:var(--text-muted); font-weight:400; font-size:0.8rem;">(calculado a partir de la fecha de nacimiento)</span>`;
+  return calcEsMenor(nacimientoStr) ? 'Sí' : 'No';
 }
 
 function renderTagList(boxId, list, labelFn, rerender) {
@@ -168,7 +167,7 @@ function formHtml(m, options, isAdminEditing) {
 
   return `
     <form id="profile-form">
-      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes (á, é, í, ó, ú, ñ): así tu ficha se verá bien y será más fácil de encontrar.</p>
+      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes (á, é, í, ó, ú, ñ). Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida: así tu ficha será más fácil de leer y de buscar.</p>
       <fieldset>
         <legend>Datos del directorio</legend>
         <div class="form-grid">
@@ -224,23 +223,23 @@ function formHtml(m, options, isAdminEditing) {
           </div>
           <div class="full">
             <label for="p-experiencia">Experiencia</label>
-            <textarea id="p-experiencia" placeholder="Separa varios elementos con comas. Ej: Diseño gráfico, Gestión de equipos, Marketing">${m.experiencia ?? ''}</textarea>
+            <textarea id="p-experiencia" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Diseño gráfico. Gestión de equipos. Marketing.">${m.experiencia ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-hobbies">Hobbies</label>
-            <textarea id="p-hobbies" placeholder="Separa varios elementos con comas. Ej: Fútbol, Lectura, Viajar">${m.hobbies ?? ''}</textarea>
+            <textarea id="p-hobbies" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Fútbol. Lectura. Viajar.">${m.hobbies ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-disponibilidad">Disponibilidad</label>
-            <textarea id="p-disponibilidad" placeholder="Separa varios elementos con comas. Ej: Fines de semana, Tardes entre semana">${m.disponibilidad ?? ''}</textarea>
+            <textarea id="p-disponibilidad" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Fines de semana. Tardes entre semana.">${m.disponibilidad ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-habilidades-humanas">Habilidades y competencias humanas</label>
-            <textarea id="p-habilidades-humanas" placeholder="Separa varios elementos con comas. Ej: Trabajo en equipo, Escucha activa, Liderazgo">${m.habilidades_humanas ?? ''}</textarea>
+            <textarea id="p-habilidades-humanas" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Trabajo en equipo. Escucha activa. Liderazgo.">${m.habilidades_humanas ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-habilidades-cristianas">Habilidades y competencias cristianas/carmelitanas</label>
-            <textarea id="p-habilidades-cristianas" placeholder="Separa varios elementos con comas. Ej: Catequesis, Animación de retiros, Oración en grupo">${m.habilidades_cristianas ?? ''}</textarea>
+            <textarea id="p-habilidades-cristianas" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Catequesis. Animación de retiros. Oración en grupo.">${m.habilidades_cristianas ?? ''}</textarea>
           </div>
           <div class="full">
             <label>Estilo de pensamiento${isAdminEditing ? '' : ' (no editable)'}</label>
