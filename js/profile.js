@@ -167,7 +167,7 @@ function formHtml(m, options, isAdminEditing) {
 
   return `
     <form id="profile-form">
-      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes (á, é, í, ó, ú, ñ). Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida: así tu ficha será más fácil de leer y de buscar.</p>
+      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes. Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida.</p>
       <fieldset>
         <legend>Datos del directorio</legend>
         <div class="form-grid">
@@ -297,7 +297,8 @@ function formHtml(m, options, isAdminEditing) {
           </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
-            <input type="text" id="p-domicilio" placeholder="C/ Mayor 12, 3ºB, Valencia" value="${m.domicilio ?? ''}" />
+            <p class="field-hint">Usa un formato lo más estándar posible (C/, Avd., etc.), incluyendo código postal y ciudad.</p>
+            <input type="text" id="p-domicilio" placeholder="Ej: C/ Mayor 12, 3ºB, 46001 Valencia" value="${m.domicilio ?? ''}" />
           </div>
           <div class="full">
             <label>Alergias</label>
