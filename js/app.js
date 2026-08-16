@@ -2,6 +2,9 @@ import { requireSession, checkIsAdmin, logout } from './auth.js';
 import { initSearch } from './search.js';
 import { initProfile } from './profile.js';
 import { initAdmin } from './admin.js';
+import { initThemeToggle } from './theme.js';
+
+initThemeToggle('theme-toggle-btn');
 
 const viewButtons = document.querySelectorAll('.tab-view-btn');
 const views = {

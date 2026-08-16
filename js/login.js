@@ -1,7 +1,9 @@
 import { supabase } from './supabaseClient.js';
 import { redirectIfLoggedIn } from './auth.js';
+import { initThemeToggle } from './theme.js';
 
 redirectIfLoggedIn();
+initThemeToggle('theme-toggle-btn');
 
 const tabLoginBtn = document.getElementById('tab-login-btn');
 const tabSignupBtn = document.getElementById('tab-signup-btn');

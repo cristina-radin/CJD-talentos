@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bolsa de Talentos · Carmelo Joven Descalzo</title>
+  <script>
+    (function () {
+      var stored = localStorage.getItem('cjd-theme');
+      var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -31,6 +38,7 @@
       <button type="button" class="tab-view-btn" id="tab-admin-btn" data-view="admin" hidden>Admin</button>
     </nav>
     <div class="user-box">
+      <button type="button" class="theme-toggle" id="theme-toggle-btn"></button>
       <span id="user-email"></span>
       <button type="button" class="btn secondary" id="logout-btn">Salir</button>
     </div>
@@ -51,6 +59,10 @@
       <div id="admin-content"></div>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <p>Bolsa de Talentos de Carmelo Joven Descalzo — herramienta interna. Los datos que contiene son de uso exclusivo del grupo y no se comparten con terceros.</p>
+  </footer>
 
   <script type="module" src="js/app.js"></script>
 </body>

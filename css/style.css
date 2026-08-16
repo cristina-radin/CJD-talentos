@@ -4,6 +4,7 @@
   --border: #e3d5b8;
   --text: #3e2415;
   --text-muted: #7a5c42;
+  --heading: #241206;
   --primary: #3e2415;
   --primary-hover: #4e2e1b;
   --header-bg: #3e2415;
@@ -12,10 +13,32 @@
   --header-text-muted: #cdb493;
   --danger: #b3261e;
   --danger-bg: #fdecea;
+  --ok: #256029;
+  --ok-bg: #e8f5e9;
   --radius: 10px;
   --shadow: 0 1px 3px rgba(62, 36, 21, 0.12);
   --font-body: "Fraunces", Georgia, "Times New Roman", serif;
   --font-brand: "Alex Brush", cursive;
+}
+
+html[data-theme="dark"] {
+  --bg: #1c140d;
+  --surface: #2a1f15;
+  --border: #4a3826;
+  --text: #f3e6d3;
+  --text-muted: #c3a482;
+  --heading: #f3d9ac;
+  --primary: #e0b378;
+  --primary-hover: #ecc38d;
+  --header-bg: #120c07;
+  --header-bg-alt: #241a10;
+  --header-text: #f3e6d3;
+  --header-text-muted: #ad9678;
+  --danger: #ff8a80;
+  --danger-bg: #3d1a17;
+  --ok: #8fdf9c;
+  --ok-bg: #16301b;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -197,7 +220,7 @@ button.btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .msg.show { display: block; }
 .msg.error { background: var(--danger-bg); color: var(--danger); }
-.msg.ok { background: #e8f5e9; color: #256029; }
+.msg.ok { background: var(--ok-bg); color: var(--ok); }
 
 /* --- App shell --- */
 
@@ -259,6 +282,36 @@ nav.main-tabs button.active {
   gap: 10px;
   font-size: 0.85rem;
   color: var(--header-text-muted);
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+header.app-header .theme-toggle {
+  border-color: var(--header-text-muted);
+  color: var(--header-text);
+}
+
+.theme-toggle-fixed {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  background: var(--surface);
 }
 
 main.app-main {
@@ -458,7 +511,7 @@ fieldset {
 fieldset legend {
   font-weight: 700;
   padding: 0 6px;
-  color: var(--primary);
+  color: var(--heading);
 }
 
 fieldset.sensitive legend { color: var(--danger); }
@@ -548,3 +601,14 @@ dialog.member-dialog::backdrop {
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
+
+.site-footer {
+  text-align: center;
+  padding: 20px 16px 28px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+
+.site-footer p { margin: 0; }
