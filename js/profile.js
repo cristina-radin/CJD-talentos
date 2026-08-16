@@ -210,6 +210,7 @@ function formHtml(m, options, isAdminEditing) {
           </div>
           <div class="full">
             <label>Titulación</label>
+            <p class="field-hint">No añadas palabras como "Grado", "Curso", etc., solo el nombre de la titulación.</p>
             <div class="tag-list" id="p-titulaciones-tags"></div>
             <div class="tag-input-row">
               <select id="p-titulacion-select">
