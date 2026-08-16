@@ -29,7 +29,7 @@ const SENSITIVE_COLUMNS = [
   { key: 'nacimiento', label: 'Nacimiento' },
   { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No') },
   { key: 'alergias', label: 'Alergias' },
-  { key: 'observaciones', label: 'Observaciones' },
+  { key: 'observaciones', label: 'Observaciones privadas' },
 ];
 
 function distinctValues(rows, field) {
@@ -57,6 +57,7 @@ function matchesText(row, q) {
     row.domicilio,
     row.alergias,
     row.observaciones,
+    row.observaciones_publicas,
     ...(Array.isArray(row.estilos) ? row.estilos : []),
     ...(Array.isArray(row.idiomas) ? row.idiomas.map(formatIdiomaEntry) : []),
   ]
@@ -93,6 +94,7 @@ function renderDetail(row) {
         <div class="full">${detailField('Disponibilidad', row.disponibilidad)}</div>
         <div class="full">${detailField('Habilidades humanas', row.habilidades_humanas)}</div>
         <div class="full">${detailField('Habilidades cristianas/carmelitanas', row.habilidades_cristianas)}</div>
+        <div class="full">${detailField('Observaciones públicas', row.observaciones_publicas)}</div>
         ${
           estilos.length
             ? `<div class="full"><label>Estilo de pensamiento</label><div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}</div></div>`
@@ -115,7 +117,7 @@ function renderDetail(row) {
         ${detailField('Menor de edad', row.es_menor ? 'Sí' : 'No')}
         <div class="full">${detailField('Domicilio', row.domicilio)}</div>
         <div class="full">${detailField('Alergias', row.alergias)}</div>
-        <div class="full">${detailField('Observaciones', row.observaciones)}</div>
+        <div class="full">${detailField('Observaciones privadas', row.observaciones)}</div>
       </div>
     </fieldset>
   `;

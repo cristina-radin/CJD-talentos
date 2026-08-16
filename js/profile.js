@@ -242,6 +242,10 @@ function formHtml(m, options, isAdminEditing) {
             <textarea id="p-habilidades-cristianas" placeholder="Separa cada elemento con un punto y empieza el siguiente en mayúscula. Ej: Catequesis. Animación de retiros. Oración en grupo.">${m.habilidades_cristianas ?? ''}</textarea>
           </div>
           <div class="full">
+            <label for="p-observaciones-publicas">Observaciones públicas</label>
+            <textarea id="p-observaciones-publicas" placeholder="Cualquier comentario que quieras que vea el resto del grupo.">${m.observaciones_publicas ?? ''}</textarea>
+          </div>
+          <div class="full">
             <label>Estilo de pensamiento${isAdminEditing ? '' : ' (no editable)'}</label>
             <div class="${isAdminEditing ? 'checkbox-row' : 'tag-list'}">${estilosHtml}</div>
           </div>
@@ -310,8 +314,8 @@ function formHtml(m, options, isAdminEditing) {
             </div>
           </div>
           <div class="full">
-            <label for="p-observaciones">Observaciones</label>
-            <textarea id="p-observaciones">${m.observaciones ?? ''}</textarea>
+            <label for="p-observaciones">Observaciones privadas</label>
+            <textarea id="p-observaciones" placeholder="Solo lo ven los admins.">${m.observaciones ?? ''}</textarea>
           </div>
         </div>
       </fieldset>
@@ -552,6 +556,7 @@ export async function initProfile(session, opts = {}) {
       disponibilidad: document.getElementById('p-disponibilidad').value.trim() || null,
       habilidades_humanas: document.getElementById('p-habilidades-humanas').value.trim() || null,
       habilidades_cristianas: document.getElementById('p-habilidades-cristianas').value.trim() || null,
+      observaciones_publicas: document.getElementById('p-observaciones-publicas').value.trim() || null,
       idiomas: idiomasList,
       telefono: document.getElementById('p-telefono').value.trim() || null,
       nif: document.getElementById('p-nif').value.trim() || null,

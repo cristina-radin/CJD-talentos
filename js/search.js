@@ -25,6 +25,7 @@ function matchesKeyword(m, q) {
     m.disponibilidad,
     m.habilidades_humanas,
     m.habilidades_cristianas,
+    m.observaciones_publicas,
     ...(Array.isArray(m.estilos) ? m.estilos.map(estiloLabel) : []),
     ...(Array.isArray(m.idiomas) ? m.idiomas.map(formatIdiomaEntry) : []),
   ]
@@ -145,6 +146,7 @@ const KEYWORD_REVEAL_FIELDS = [
   { key: 'disponibilidad', label: 'Disponibilidad' },
   { key: 'habilidades_humanas', label: 'Habilidades humanas' },
   { key: 'habilidades_cristianas', label: 'Habilidades cristianas' },
+  { key: 'observaciones_publicas', label: 'Observaciones' },
 ];
 
 function matchingRevealFields(m, keyword) {
@@ -256,6 +258,7 @@ function renderFullDetail(m) {
     ${m.disponibilidad ? `<div class="card-section"><span class="card-label">Disponibilidad</span><p>${m.disponibilidad}</p></div>` : ''}
     ${m.habilidades_humanas ? `<div class="card-section"><span class="card-label">Habilidades humanas</span><p>${m.habilidades_humanas}</p></div>` : ''}
     ${m.habilidades_cristianas ? `<div class="card-section"><span class="card-label">Habilidades cristianas</span><p>${m.habilidades_cristianas}</p></div>` : ''}
+    ${m.observaciones_publicas ? `<div class="card-section"><span class="card-label">Observaciones</span><p>${m.observaciones_publicas}</p></div>` : ''}
   `;
 }
 
