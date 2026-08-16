@@ -99,6 +99,24 @@ function nacimientoValue() {
   return `${dia}/${mes}/${anio}`;
 }
 
+// Calcula si alguien es menor de edad a partir de su fecha de nacimiento en
+// lugar de fiarse de una casilla marcada a mano, que se puede olvidar.
+function calcEsMenor(nacimientoStr) {
+  const { dia, mes, anio } = parseNacimiento(nacimientoStr);
+  if (!dia || !mes || !anio) return false;
+  const nacimiento = new Date(Number(anio), Number(mes) - 1, Number(dia));
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const cumpleEsteAnio = new Date(hoy.getFullYear(), nacimiento.getMonth(), nacimiento.getDate());
+  if (hoy < cumpleEsteAnio) edad--;
+  return edad < 18;
+}
+
+function esMenorIndicatorHtml(nacimientoStr) {
+  const esMenor = calcEsMenor(nacimientoStr);
+  return `${esMenor ? 'Sí' : 'No'} <span style="color:var(--text-muted); font-weight:400; font-size:0.8rem;">(calculado a partir de la fecha de nacimiento)</span>`;
+}
+
 function renderTagList(boxId, list, labelFn, rerender) {
   const box = document.getElementById(boxId);
   box.innerHTML = '';
@@ -150,6 +168,7 @@ function formHtml(m, options, isAdminEditing) {
 
   return `
     <form id="profile-form">
+      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes (á, é, í, ó, ú, ñ): así tu ficha se verá bien y será más fácil de encontrar.</p>
       <fieldset>
         <legend>Datos del directorio</legend>
         <div class="form-grid">
@@ -205,23 +224,23 @@ function formHtml(m, options, isAdminEditing) {
           </div>
           <div class="full">
             <label for="p-experiencia">Experiencia</label>
-            <textarea id="p-experiencia" placeholder="Sepára los puntos con comas, p.ej: diseño gráfico, gestión de equipos, marketing">${m.experiencia ?? ''}</textarea>
+            <textarea id="p-experiencia" placeholder="Separa varios elementos con comas. Ej: Diseño gráfico, Gestión de equipos, Marketing">${m.experiencia ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-hobbies">Hobbies</label>
-            <textarea id="p-hobbies" placeholder="Sepára varios con comas, p.ej: fútbol, lectura, viajar">${m.hobbies ?? ''}</textarea>
+            <textarea id="p-hobbies" placeholder="Separa varios elementos con comas. Ej: Fútbol, Lectura, Viajar">${m.hobbies ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-disponibilidad">Disponibilidad</label>
-            <textarea id="p-disponibilidad" placeholder="Ej: fines de semana, tardes entre semana...">${m.disponibilidad ?? ''}</textarea>
+            <textarea id="p-disponibilidad" placeholder="Separa varios elementos con comas. Ej: Fines de semana, Tardes entre semana">${m.disponibilidad ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-habilidades-humanas">Habilidades y competencias humanas</label>
-            <textarea id="p-habilidades-humanas">${m.habilidades_humanas ?? ''}</textarea>
+            <textarea id="p-habilidades-humanas" placeholder="Separa varios elementos con comas. Ej: Trabajo en equipo, Escucha activa, Liderazgo">${m.habilidades_humanas ?? ''}</textarea>
           </div>
           <div class="full">
             <label for="p-habilidades-cristianas">Habilidades y competencias cristianas/carmelitanas</label>
-            <textarea id="p-habilidades-cristianas">${m.habilidades_cristianas ?? ''}</textarea>
+            <textarea id="p-habilidades-cristianas" placeholder="Separa varios elementos con comas. Ej: Catequesis, Animación de retiros, Oración en grupo">${m.habilidades_cristianas ?? ''}</textarea>
           </div>
           <div class="full">
             <label>Estilo de pensamiento${isAdminEditing ? '' : ' (no editable)'}</label>
@@ -269,11 +288,9 @@ function formHtml(m, options, isAdminEditing) {
             <label for="p-nacimiento-dia">Fecha de nacimiento</label>
             ${nacimientoFieldsHtml(m.nacimiento)}
           </div>
-          <div class="checkbox-row">
-            <label for="p-es-menor">
-              <input type="checkbox" id="p-es-menor" ${m.es_menor ? 'checked' : ''} />
-              Es menor de edad
-            </label>
+          <div>
+            <label>Es menor de edad</label>
+            <p id="p-es-menor-info" style="margin:0; font-size:0.9rem;">${esMenorIndicatorHtml(m.nacimiento)}</p>
           </div>
           <div class="full">
             <label for="p-domicilio">Domicilio</label>
@@ -281,6 +298,7 @@ function formHtml(m, options, isAdminEditing) {
           </div>
           <div class="full">
             <label>Alergias</label>
+            <p class="field-hint">Añádelas una a una: elige o escribe cada alergia y pulsa "Añadir".</p>
             <div class="tag-list" id="p-alergias-tags"></div>
             <div class="tag-input-row">
               <select id="p-alergia-select">
@@ -394,6 +412,12 @@ export async function initProfile(session, opts = {}) {
   renderAlergiasTags();
   renderTitulacionesTags();
   ['p-ciudad'].forEach(wireComboField);
+
+  ['p-nacimiento-dia', 'p-nacimiento-mes', 'p-nacimiento-anio'].forEach((id) => {
+    document.getElementById(id).addEventListener('change', () => {
+      document.getElementById('p-es-menor-info').innerHTML = esMenorIndicatorHtml(nacimientoValue());
+    });
+  });
 
   document.getElementById('p-idioma-select').addEventListener('change', (e) => {
     const otro = document.getElementById('p-idioma-nombre-otro');
@@ -536,7 +560,7 @@ export async function initProfile(session, opts = {}) {
       domicilio: document.getElementById('p-domicilio').value.trim() || null,
       alergias: alergiasList.length ? alergiasList.join(', ') : null,
       observaciones: document.getElementById('p-observaciones').value.trim() || null,
-      es_menor: document.getElementById('p-es-menor').checked,
+      es_menor: calcEsMenor(nacimientoValue()),
       ocd: document.getElementById('p-ocd').checked,
     };
 

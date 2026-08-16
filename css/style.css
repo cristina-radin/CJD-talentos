@@ -465,6 +465,22 @@ fieldset.sensitive legend { color: var(--danger); }
 
 .form-grid p { margin: 0; }
 
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 14px;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: -2px 0 6px;
+}
+
 .table-wrap { overflow-x: auto; }
 
 table.admin-table {
