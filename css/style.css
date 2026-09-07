@@ -2,8 +2,10 @@
   --bg: #fbf4e4;
   --surface: #ffffff;
   --border: #e3d5b8;
-  --consecrated-border: #b88924;
-  --consecrated-shadow: 0 2px 8px rgba(184, 137, 36, 0.22);
+  --consecrated-gold-dark: #9a6b18;
+  --consecrated-gold: #d4aa48;
+  --consecrated-gold-light: #ecd27f;
+  --consecrated-shadow: 0 4px 14px rgba(154, 107, 24, 0.24), 0 1px 3px rgba(62, 36, 21, 0.12);
   --text: #3e2415;
   --text-muted: #7a5c42;
   --heading: #241206;
@@ -299,6 +301,73 @@ main.app-main {
 section.view { display: none; }
 section.view.active { display: block; }
 
+.welcome-page {
+  min-height: calc(100vh - 178px);
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(300px, 1.1fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 84px);
+  padding: clamp(24px, 5vw, 64px) clamp(8px, 4vw, 52px);
+}
+
+.welcome-collage {
+  position: relative;
+  min-height: 430px;
+}
+
+.collage-photo {
+  position: absolute;
+  width: 48%;
+  height: 210px;
+  object-fit: cover;
+  border: 8px solid var(--surface);
+  box-shadow: 0 12px 28px rgba(62, 36, 21, 0.2);
+  filter: saturate(0.85);
+}
+
+.collage-photo-one { top: 22px; left: 5%; transform: rotate(-7deg); }
+.collage-photo-two { top: 0; right: 3%; transform: rotate(6deg); }
+.collage-photo-three { bottom: 12px; left: 0; transform: rotate(5deg); }
+.collage-photo-four { right: 5%; bottom: 0; transform: rotate(-6deg); }
+
+.welcome-copy { max-width: 580px; }
+
+.welcome-kicker {
+  margin: 0 0 12px;
+  color: var(--consecrated-gold-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.welcome-copy h2 {
+  margin: 0 0 20px;
+  color: var(--heading);
+  font-size: clamp(2.2rem, 5vw, 4.6rem);
+  line-height: 0.98;
+  font-weight: 600;
+}
+
+.welcome-copy > p:not(.welcome-kicker) {
+  max-width: 570px;
+  margin: 0 0 28px;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.welcome-cta { display: inline-flex; align-items: center; gap: 12px; }
+.welcome-cta span { font-size: 1.2rem; line-height: 1; }
+
+@media (max-width: 720px) {
+  .welcome-page { min-height: auto; grid-template-columns: 1fr; padding-top: 26px; }
+  .welcome-collage { min-height: 280px; order: 2; }
+  .collage-photo { height: 145px; border-width: 5px; }
+  .welcome-copy { order: 1; }
+  .welcome-copy h2 { font-size: 2.7rem; }
+}
+
 .filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -342,7 +411,10 @@ section.view.active { display: block; }
 }
 
 .member-card.consecrated-card {
-  border-color: var(--consecrated-border);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, var(--consecrated-gold-dark), var(--consecrated-gold-light) 48%, var(--consecrated-gold-dark)) border-box;
   box-shadow: var(--consecrated-shadow);
 }
 

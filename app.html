@@ -32,7 +32,8 @@
       </div>
     </div>
     <nav class="main-tabs">
-      <button type="button" class="tab-view-btn active" data-view="search">Buscar</button>
+      <button type="button" class="tab-view-btn active" data-view="welcome">Inicio</button>
+      <button type="button" class="tab-view-btn" data-view="search">Buscar</button>
       <button type="button" class="tab-view-btn" data-view="profile">Mi ficha</button>
       <button type="button" class="tab-view-btn" id="tab-admin-btn" data-view="admin" hidden>Admin</button>
     </nav>
@@ -43,7 +44,24 @@
   </header>
 
   <main class="app-main">
-    <section class="view active" id="view-search">
+    <section class="view active" id="view-welcome">
+      <div class="welcome-page">
+        <div class="welcome-collage" aria-hidden="true">
+          <img class="collage-photo collage-photo-one" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=85" alt="" />
+          <img class="collage-photo collage-photo-two" src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=900&q=85" alt="" />
+          <img class="collage-photo collage-photo-three" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85" alt="" />
+          <img class="collage-photo collage-photo-four" src="https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?auto=format&fit=crop&w=900&q=85" alt="" />
+        </div>
+        <div class="welcome-copy">
+          <p class="welcome-kicker">Carmelo Joven Descalzo</p>
+          <h2>Una comunidad llena de talento</h2>
+          <p>Bienvenido/a a la bolsa de talentos del Carmelo Joven Descalzo. Aquí vas a poder rellenar una ficha con las capacidades que puedes aportar y buscar la del resto de gente que compone la asociación. El objetivo es que entre todos podamos recurrir a los talentos que todos podemos aportar.</p>
+          <button type="button" class="btn welcome-cta" id="welcome-search-btn">Explorar fichas <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-search">
       <div class="filters" id="search-filters"></div>
       <div class="count-line" id="search-count"></div>
       <div class="results-grid" id="search-results"></div>

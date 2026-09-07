@@ -8,6 +8,7 @@ initThemeToggle('theme-toggle-btn');
 
 const viewButtons = document.querySelectorAll('.tab-view-btn');
 const views = {
+  welcome: document.getElementById('view-welcome'),
   search: document.getElementById('view-search'),
   profile: document.getElementById('view-profile'),
   admin: document.getElementById('view-admin'),
@@ -43,11 +44,11 @@ async function main() {
     });
   });
 
-  const brandHomeLink = document.getElementById('brand-home-link');
   const goToSearch = () => {
     showView('search');
     refreshers.search();
   };
+  const brandHomeLink = document.getElementById('brand-home-link');
   brandHomeLink.addEventListener('click', goToSearch);
   brandHomeLink.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -55,8 +56,8 @@ async function main() {
       goToSearch();
     }
   });
+  document.getElementById('welcome-search-btn').addEventListener('click', goToSearch);
 
-  initSearch();
   initProfile(session);
   if (admin) initAdmin();
 }
