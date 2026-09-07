@@ -52,6 +52,7 @@ async function loadWelcomeImages() {
 
 const viewButtons = document.querySelectorAll('.tab-view-btn');
 const views = {
+  pending: document.getElementById('view-pending'),
   welcome: document.getElementById('view-welcome'),
   search: document.getElementById('view-search'),
   profile: document.getElementById('view-profile'),
@@ -67,13 +68,27 @@ async function main() {
   const session = await requireSession();
   if (!session) return;
 
-  await loadWelcomeImages();
-
   document.getElementById('user-email').textContent = session.user.email;
   document.getElementById('logout-btn').addEventListener('click', logout);
 
   const admin = await checkIsAdmin(session.user.email);
   if (admin) document.getElementById('tab-admin-btn').hidden = false;
+
+  if (!admin) {
+    const { data: member, error } = await supabase
+      .from('members')
+      .select('id')
+      .eq('email', session.user.email)
+      .maybeSingle();
+
+    if (error || !member) {
+      document.querySelector('.main-tabs').hidden = true;
+      showView('pending');
+      return;
+    }
+  }
+
+  await loadWelcomeImages();
 
   // Cada pestaña vuelve a pedir sus datos cada vez que se abre, para no
   // enseñar información desactualizada tras guardar cambios en otra pestaña.

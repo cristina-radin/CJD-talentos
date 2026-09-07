@@ -305,6 +305,20 @@ main.app-main:has(#view-welcome.active) { padding-top: 0; padding-bottom: 0; }
 section.view { display: none; }
 section.view.active { display: block; }
 
+.access-pending {
+  max-width: 620px;
+  margin: 12vh auto;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.access-pending h2 { margin-top: 0; color: var(--heading); }
+.access-pending p { color: var(--text-muted); line-height: 1.6; }
+
 .welcome-page {
   height: calc(100svh - 152px);
   min-height: 540px;
@@ -336,7 +350,7 @@ section.view.active { display: block; }
 .collage-photo[hidden] { display: none; }
 
 .collage-photo:hover {
-  scale: 1.08;
+  scale: 1.16;
   z-index: 3;
   box-shadow: 0 18px 34px rgba(62, 36, 21, 0.3);
   filter: saturate(1);
