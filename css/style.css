@@ -298,39 +298,56 @@ main.app-main {
   z-index: 1;
 }
 
+body:has(#view-welcome.active) { overflow: hidden; }
+main.app-main:has(#view-welcome.active) { padding-top: 0; padding-bottom: 0; }
+
 section.view { display: none; }
 section.view.active { display: block; }
 
 .welcome-page {
-  min-height: calc(100vh - 178px);
-  display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(300px, 1.1fr);
-  align-items: center;
-  gap: clamp(28px, 6vw, 84px);
-  padding: clamp(24px, 5vw, 64px) clamp(8px, 4vw, 52px);
+  height: calc(100svh - 152px);
+  min-height: 540px;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
 }
 
 .welcome-collage {
-  position: relative;
-  min-height: 430px;
+  position: absolute;
+  inset: 0;
 }
 
 .collage-photo {
   position: absolute;
-  width: 48%;
-  height: 210px;
+  width: clamp(150px, 22vw, 330px);
+  height: clamp(140px, 22vh, 250px);
   object-fit: cover;
   border: 8px solid var(--surface);
   box-shadow: 0 12px 28px rgba(62, 36, 21, 0.2);
   filter: saturate(0.85);
 }
 
-.collage-photo-one { top: 22px; left: 5%; transform: rotate(-7deg); }
-.collage-photo-two { top: 0; right: 3%; transform: rotate(6deg); }
-.collage-photo-three { bottom: 12px; left: 0; transform: rotate(5deg); }
-.collage-photo-four { right: 5%; bottom: 0; transform: rotate(-6deg); }
+.collage-photo-one { top: 4%; left: 8%; width: clamp(160px, 25vw, 360px); height: clamp(170px, 30vh, 310px); transform: rotate(-7deg); }
+.collage-photo-two { top: 8%; right: 7%; width: clamp(140px, 19vw, 280px); height: clamp(180px, 32vh, 330px); transform: rotate(6deg); }
+.collage-photo-three { bottom: 7%; left: 3%; width: clamp(180px, 27vw, 390px); height: clamp(130px, 21vh, 230px); transform: rotate(5deg); }
+.collage-photo-four { right: 10%; bottom: 4%; width: clamp(170px, 23vw, 330px); height: clamp(150px, 25vh, 270px); transform: rotate(-6deg); }
 
-.welcome-copy { max-width: 580px; }
+.welcome-copy-box {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 650px);
+  transform: translate(-50%, -50%);
+  padding: clamp(24px, 4vw, 44px);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(212, 170, 72, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 14px 36px rgba(62, 36, 21, 0.22);
+  text-align: center;
+}
+
+.welcome-copy { max-width: 580px; margin: 0 auto; }
 
 .welcome-kicker {
   margin: 0 0 12px;
@@ -361,11 +378,15 @@ section.view.active { display: block; }
 .welcome-cta span { font-size: 1.2rem; line-height: 1; }
 
 @media (max-width: 720px) {
-  .welcome-page { min-height: auto; grid-template-columns: 1fr; padding-top: 26px; }
-  .welcome-collage { min-height: 280px; order: 2; }
-  .collage-photo { height: 145px; border-width: 5px; }
-  .welcome-copy { order: 1; }
-  .welcome-copy h2 { font-size: 2.7rem; }
+  .welcome-page { height: calc(100svh - 224px); min-height: 520px; }
+  .collage-photo { border-width: 5px; }
+  .collage-photo-one { top: 4%; left: -5%; }
+  .collage-photo-two { top: 5%; right: -8%; }
+  .collage-photo-three { bottom: 4%; left: -10%; }
+  .collage-photo-four { right: -8%; bottom: 3%; }
+  .welcome-copy-box { width: min(88%, 520px); padding: 24px 20px; }
+  .welcome-copy h2 { font-size: 2.25rem; }
+  .welcome-copy > p:not(.welcome-kicker) { font-size: 0.92rem; line-height: 1.5; }
 }
 
 .filters {
@@ -403,7 +424,7 @@ section.view.active { display: block; }
 .member-card {
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   box-shadow: var(--shadow);
@@ -411,21 +432,21 @@ section.view.active { display: block; }
 }
 
 .member-card.consecrated-card {
-  border: 1px solid transparent;
+  border: 3px solid transparent;
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
     linear-gradient(135deg, var(--consecrated-gold-dark), var(--consecrated-gold-light) 48%, var(--consecrated-gold-dark)) border-box;
   box-shadow: var(--consecrated-shadow);
 }
 
-.member-card h3 { margin: 0 0 12px; font-size: 1.12rem; padding-right: 56px; }
+.member-card h3 { margin: 0 0 12px; font-size: 1.12rem; padding-right: 82px; }
 
 .member-photo {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
