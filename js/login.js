@@ -84,7 +84,13 @@ signupForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: new URL('app.html', window.location.href).href,
+    },
+  });
   submitBtn.disabled = false;
 
   if (error) {
