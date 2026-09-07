@@ -3,8 +3,30 @@ import { initSearch } from './search.js';
 import { initProfile } from './profile.js';
 import { initAdmin } from './admin.js';
 import { initThemeToggle } from './theme.js';
+import { supabase } from './supabaseClient.js';
 
 initThemeToggle('theme-toggle-btn');
+
+const welcomeImagePaths = ['inicio1.jpg', 'inicio2.jpg', 'inicio3.jpg', 'inicio4.jpg', 'inicio5.jpg'];
+
+async function loadWelcomeImages() {
+  const { data, error } = await supabase.storage
+    .from('fotos_inicio')
+    .createSignedUrls(welcomeImagePaths, 3600);
+
+  if (error) {
+    console.error('No se pudieron cargar las fotos de inicio:', error.message);
+    return;
+  }
+
+  data?.forEach(({ path, signedUrl }) => {
+    const image = document.querySelector(`[data-welcome-image="${path}"]`);
+    if (image && signedUrl) {
+      image.src = signedUrl;
+      image.hidden = false;
+    }
+  });
+}
 
 const viewButtons = document.querySelectorAll('.tab-view-btn');
 const views = {
@@ -22,6 +44,8 @@ function showView(name) {
 async function main() {
   const session = await requireSession();
   if (!session) return;
+
+  await loadWelcomeImages();
 
   document.getElementById('user-email').textContent = session.user.email;
   document.getElementById('logout-btn').addEventListener('click', logout);
