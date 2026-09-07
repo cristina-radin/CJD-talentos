@@ -49,33 +49,33 @@
       </form>
 
       <form id="signup-form" style="display:none">
+        <div>
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" required autocomplete="email" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin:-6px 0 0">
+          Usa el mismo email con el que apareces en la bolsa de talentos.
+        </p>
+        <div>
+          <label for="signup-password">Contraseña</label>
           <div class="password-field">
             <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
             <button type="button" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">&#128065;</button>
           </div>
-          <label for="signup-email">Email</label>
-          <input type="email" id="signup-email" required autocomplete="email" />
         </div>
+        <div>
+          <label for="signup-password2">Repite la contraseña</label>
           <div class="password-field">
             <input type="password" id="signup-password2" required minlength="6" autocomplete="new-password" />
             <button type="button" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">&#128065;</button>
           </div>
-          Usa el mismo email con el que apareces en la bolsa de talentos.
-        </p>
+        </div>
         <div>
+          <label for="signup-group-password">Clave de grupo</label>
           <div class="password-field">
             <input type="password" id="signup-group-password" required autocomplete="off" />
             <button type="button" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">&#128065;</button>
           </div>
-          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
-        </div>
-        <div>
-          <label for="signup-password2">Repite la contraseña</label>
-          <input type="password" id="signup-password2" required minlength="6" autocomplete="new-password" />
-        </div>
-        <div>
-          <label for="signup-group-password">Clave de grupo</label>
-          <input type="password" id="signup-group-password" required autocomplete="off" />
         </div>
         <div class="msg" id="signup-msg"></div>
         <button type="submit" class="btn" id="signup-submit">Crear cuenta</button>
