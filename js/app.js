@@ -9,6 +9,7 @@ initThemeToggle('theme-toggle-btn');
 
 async function loadWelcomeImages() {
   const bucket = supabase.storage.from('fotos_inicio');
+  const fallbackPaths = ['inicio1.jpg', 'inicio2.jpg', 'inicio3.jpg', 'inicio4.jpg', 'inicio5.jpg'];
   const { data: files, error: listError } = await bucket.list('', {
     limit: 20,
     sortBy: { column: 'name', order: 'asc' },
@@ -19,15 +20,25 @@ async function loadWelcomeImages() {
     return;
   }
 
-  const imagePaths = (files ?? [])
+  const listedPaths = (files ?? [])
     .filter(({ name, id }) => id && /\.(jpe?g|png|webp|gif)$/i.test(name))
     .slice(0, 5)
     .map(({ name }) => name);
+  const imagePaths = listedPaths.length ? listedPaths : fallbackPaths;
+
+  if (!listedPaths.length) {
+    console.warn('No se encontraron imágenes al listar fotos_inicio; se probarán los nombres inicio1.jpg a inicio5.jpg.');
+  }
+
   const { data, error } = await bucket.createSignedUrls(imagePaths, 3600);
 
   if (error) {
     console.error('No se pudieron cargar las fotos de inicio:', error.message);
     return;
+  }
+
+  if (!data?.some(({ signedUrl }) => signedUrl)) {
+    console.error('El bucket fotos_inicio no contiene imágenes accesibles para este usuario.');
   }
 
   document.querySelectorAll('[data-welcome-image]').forEach((image, index) => {
