@@ -7,20 +7,31 @@ import { supabase } from './supabaseClient.js';
 
 initThemeToggle('theme-toggle-btn');
 
-const welcomeImagePaths = ['inicio1.jpg', 'inicio2.jpg', 'inicio3.jpg', 'inicio4.jpg', 'inicio5.jpg'];
-
 async function loadWelcomeImages() {
-  const { data, error } = await supabase.storage
-    .from('fotos_inicio')
-    .createSignedUrls(welcomeImagePaths, 3600);
+  const bucket = supabase.storage.from('fotos_inicio');
+  const { data: files, error: listError } = await bucket.list('', {
+    limit: 20,
+    sortBy: { column: 'name', order: 'asc' },
+  });
+
+  if (listError) {
+    console.error('No se pudieron listar las fotos de inicio:', listError.message);
+    return;
+  }
+
+  const imagePaths = (files ?? [])
+    .filter(({ name, id }) => id && /\.(jpe?g|png|webp|gif)$/i.test(name))
+    .slice(0, 5)
+    .map(({ name }) => name);
+  const { data, error } = await bucket.createSignedUrls(imagePaths, 3600);
 
   if (error) {
     console.error('No se pudieron cargar las fotos de inicio:', error.message);
     return;
   }
 
-  data?.forEach(({ path, signedUrl }) => {
-    const image = document.querySelector(`[data-welcome-image="${path}"]`);
+  document.querySelectorAll('[data-welcome-image]').forEach((image, index) => {
+    const signedUrl = data?.[index]?.signedUrl;
     if (image && signedUrl) {
       image.src = signedUrl;
       image.hidden = false;
