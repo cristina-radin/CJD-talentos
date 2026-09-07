@@ -167,17 +167,19 @@ function formHtml(m, options, isAdminEditing) {
 
   return `
     <form id="profile-form">
-      <p class="form-hint">Escribe con la letra inicial en mayúscula y usa los acentos correspondientes. Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida.</p>
+      <p class="form-hint"><span class="hint-important" aria-hidden="true">&#9888;</span> Escribe con la letra inicial en mayúscula y usa los acentos correspondientes. Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida.</p>
       <fieldset>
         <legend>Datos del directorio</legend>
         <div class="form-grid">
           <div class="full">
-            <label>Foto</label>
+            <div class="photo-label-row">
+              <label>Foto</label>
+              <span class="photo-hint">¡Anímate a poner una foto divertida!</span>
+            </div>
             <div class="photo-upload-row">
               <img id="p-foto-preview" class="photo-preview" src="${m.foto_url ?? ''}" alt="" style="${m.foto_url ? '' : 'display:none'}" />
               ${isAdminEditing ? '' : '<input type="file" id="p-foto-input" accept="image/*" />'}
             </div>
-            <p class="form-hint">¡Anímate a poner una foto divertida!</p>
             <div class="msg" id="p-foto-msg"></div>
           </div>
           <div>

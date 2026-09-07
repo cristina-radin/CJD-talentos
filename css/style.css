@@ -336,7 +336,7 @@ section.view.active { display: block; }
 
 .collage-photo-one { top: 1%; left: 2%; width: 46%; height: 38%; transform: rotate(-8deg); }
 .collage-photo-two { top: 5%; right: 1%; width: 38%; height: 42%; transform: rotate(7deg); }
-.collage-photo-three { top: 30%; left: 31%; z-index: 2; width: 39%; height: 40%; transform: rotate(-2deg); }
+.collage-photo-three { top: 33%; left: 29%; z-index: 2; width: 43%; height: 32%; object-fit: contain; background: var(--surface); transform: rotate(-2deg); }
 .collage-photo-four { right: 2%; bottom: 1%; width: 43%; height: 36%; transform: rotate(-7deg); }
 .collage-photo-five { bottom: 3%; left: 1%; width: 47%; height: 32%; transform: rotate(6deg); }
 
@@ -388,7 +388,7 @@ section.view.active { display: block; }
   .collage-photo { border-width: 5px; }
   .collage-photo-one { top: 1%; left: -7%; width: 45%; height: 38%; }
   .collage-photo-two { top: 5%; right: -8%; width: 38%; height: 42%; }
-  .collage-photo-three { top: 29%; left: 29%; width: 42%; height: 42%; }
+  .collage-photo-three { top: 34%; left: 25%; width: 50%; height: 30%; }
   .collage-photo-four { right: -7%; bottom: 1%; width: 43%; height: 36%; }
   .collage-photo-five { bottom: 3%; left: -7%; width: 47%; height: 32%; }
   .welcome-copy-box { width: min(88%, 520px); margin: -18px auto 0; padding: 24px 20px; text-align: center; }
@@ -478,6 +478,21 @@ section.view.active { display: block; }
   flex-wrap: wrap;
 }
 
+.photo-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.photo-label-row label { margin-bottom: 4px; }
+
+.photo-hint {
+  color: var(--consecrated-gold-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .photo-preview {
   width: 72px;
   height: 72px;
@@ -520,7 +535,7 @@ dialog.lightbox img {
 
 .card-label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -605,6 +620,12 @@ fieldset.sensitive legend { color: var(--danger); }
   border-radius: 8px;
   padding: 10px 12px;
   margin: 0 0 14px;
+}
+
+.hint-important {
+  color: var(--consecrated-gold-dark);
+  font-size: 1.05rem;
+  margin-right: 5px;
 }
 
 .field-hint {
