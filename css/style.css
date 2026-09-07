@@ -2,6 +2,7 @@
   --bg: #fbf4e4;
   --surface: #ffffff;
   --border: #e3d5b8;
+  --consecrated-border: #c9a65b;
   --text: #3e2415;
   --text-muted: #7a5c42;
   --heading: #241206;
@@ -81,6 +82,7 @@ a { color: var(--primary); }
 .logo-watermark img {
   width: min(60vw, 640px);
   opacity: 0.22;
+  transform: translateY(4vh);
 }
 
 .center-screen {
@@ -167,6 +169,26 @@ input, select, textarea {
   color: var(--text);
 }
 
+.password-field { position: relative; }
+
+.password-field input { padding-right: 42px; }
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 4px;
+  line-height: 1;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.toggle-password:hover { color: var(--text); }
+
 textarea { resize: vertical; min-height: 60px; }
 
 button.btn {
@@ -220,6 +242,7 @@ header.app-header {
 header.app-header .brand-lockup {
   margin-bottom: 0;
   color: var(--header-text);
+  cursor: pointer;
 }
 
 header.app-header .brand-title { font-size: 1.5rem; }
@@ -317,14 +340,16 @@ section.view.active { display: block; }
   cursor: pointer;
 }
 
-.member-card h3 { margin: 0 0 12px; font-size: 1.05rem; padding-right: 56px; }
+.member-card.consecrated-card { border-color: var(--consecrated-border); }
+
+.member-card h3 { margin: 0 0 12px; font-size: 1.12rem; padding-right: 56px; }
 
 .member-photo {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);

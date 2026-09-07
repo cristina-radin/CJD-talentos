@@ -217,7 +217,7 @@ function renderResults(members, keyword = '') {
       const revealFields = matchingRevealFields(m, keyword);
 
       return `
-        <div class="member-card" data-id="${m.id}">
+        <div class="member-card${m.ocd ? ' consecrated-card' : ''}" data-id="${m.id}">
           ${m.foto_url ? `<img class="member-photo" src="${m.foto_url}" alt="Foto de ${m.nombre ?? ''}" data-full="${m.foto_url}" />` : ''}
           <h3>${m.nombre ?? ''} ${m.apellidos ?? ''}</h3>
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
@@ -231,6 +231,7 @@ function renderResults(members, keyword = '') {
     .join('');
 
   grid.querySelectorAll('.member-photo').forEach((img) => {
+    img.addEventListener('pointerdown', (e) => e.stopPropagation());
     img.addEventListener('click', (e) => {
       e.stopPropagation();
       openLightbox(img.dataset.full);
@@ -238,7 +239,7 @@ function renderResults(members, keyword = '') {
   });
 
   grid.querySelectorAll('.member-card').forEach((card) => {
-    card.addEventListener('click', () => {
+    card.addEventListener('pointerdown', () => {
       const member = members.find((m) => m.id === card.dataset.id);
       if (member) openDetail(member);
     });
@@ -279,8 +280,13 @@ function ensureDialog() {
   `;
   document.body.appendChild(dialogEl);
   dialogEl.querySelector('.member-dialog-close').addEventListener('click', () => dialogEl.close());
+  let startedOnBackdrop = false;
+  dialogEl.addEventListener('pointerdown', (e) => {
+    startedOnBackdrop = e.target === dialogEl;
+  });
   dialogEl.addEventListener('click', (e) => {
-    if (e.target === dialogEl) dialogEl.close();
+    if (e.target === dialogEl && startedOnBackdrop) dialogEl.close();
+    startedOnBackdrop = false;
   });
   return dialogEl;
 }

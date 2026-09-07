@@ -10,6 +10,17 @@ const tabSignupBtn = document.getElementById('tab-signup-btn');
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
 
+document.querySelectorAll('.toggle-password').forEach((button) => {
+  button.addEventListener('click', () => {
+    const input = button.parentElement.querySelector('input');
+    const showingPassword = input.type === 'text';
+    input.type = showingPassword ? 'password' : 'text';
+    const label = showingPassword ? 'Mostrar contraseña' : 'Ocultar contraseña';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  });
+});
+
 tabLoginBtn.addEventListener('click', () => {
   tabLoginBtn.classList.add('active');
   tabSignupBtn.classList.remove('active');

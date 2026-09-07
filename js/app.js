@@ -43,6 +43,19 @@ async function main() {
     });
   });
 
+  const brandHomeLink = document.getElementById('brand-home-link');
+  const goToSearch = () => {
+    showView('search');
+    refreshers.search();
+  };
+  brandHomeLink.addEventListener('click', goToSearch);
+  brandHomeLink.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      goToSearch();
+    }
+  });
+
   initSearch();
   initProfile(session);
   if (admin) initAdmin();
