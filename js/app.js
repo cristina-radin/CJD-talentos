@@ -44,16 +44,19 @@ async function main() {
     });
   });
 
+  const goToWelcome = () => {
+    showView('welcome');
+  };
   const goToSearch = () => {
     showView('search');
     refreshers.search();
   };
   const brandHomeLink = document.getElementById('brand-home-link');
-  brandHomeLink.addEventListener('click', goToSearch);
+  brandHomeLink.addEventListener('click', goToWelcome);
   brandHomeLink.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      goToSearch();
+      goToWelcome();
     }
   });
   document.getElementById('welcome-search-btn').addEventListener('click', goToSearch);

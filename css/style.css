@@ -2,6 +2,7 @@
   --bg: #fbf4e4;
   --surface: #ffffff;
   --border: #e3d5b8;
+  --card-border: #bda987;
   --consecrated-gold-dark: #9a6b18;
   --consecrated-gold: #d4aa48;
   --consecrated-gold-light: #ecd27f;
@@ -331,6 +332,8 @@ section.view.active { display: block; }
 .collage-photo-two { top: 8%; right: 7%; width: clamp(140px, 19vw, 280px); height: clamp(180px, 32vh, 330px); transform: rotate(6deg); }
 .collage-photo-three { bottom: 7%; left: 3%; width: clamp(180px, 27vw, 390px); height: clamp(130px, 21vh, 230px); transform: rotate(5deg); }
 .collage-photo-four { right: 10%; bottom: 4%; width: clamp(170px, 23vw, 330px); height: clamp(150px, 25vh, 270px); transform: rotate(-6deg); }
+.collage-photo-five { top: 2%; left: 38%; width: clamp(120px, 16vw, 230px); height: clamp(110px, 18vh, 200px); transform: rotate(4deg); }
+.collage-photo-six { right: 34%; bottom: 2%; width: clamp(130px, 18vw, 250px); height: clamp(115px, 19vh, 210px); transform: rotate(-4deg); }
 
 .welcome-copy-box {
   position: absolute;
@@ -384,6 +387,8 @@ section.view.active { display: block; }
   .collage-photo-two { top: 5%; right: -8%; }
   .collage-photo-three { bottom: 4%; left: -10%; }
   .collage-photo-four { right: -8%; bottom: 3%; }
+  .collage-photo-five { top: 1%; left: 35%; width: 130px; height: 105px; }
+  .collage-photo-six { right: 30%; bottom: 1%; width: 140px; height: 110px; }
   .welcome-copy-box { width: min(88%, 520px); padding: 24px 20px; }
   .welcome-copy h2 { font-size: 2.25rem; }
   .welcome-copy > p:not(.welcome-kicker) { font-size: 0.92rem; line-height: 1.5; }
@@ -424,7 +429,7 @@ section.view.active { display: block; }
 .member-card {
   position: relative;
   background: var(--surface);
-  border: 2px solid var(--border);
+  border: 2px solid var(--card-border);
   border-radius: var(--radius);
   padding: 16px;
   box-shadow: var(--shadow);
@@ -432,21 +437,21 @@ section.view.active { display: block; }
 }
 
 .member-card.consecrated-card {
-  border: 3px solid transparent;
+  border: 4px solid transparent;
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(135deg, var(--consecrated-gold-dark), var(--consecrated-gold-light) 48%, var(--consecrated-gold-dark)) border-box;
-  box-shadow: var(--consecrated-shadow);
+    linear-gradient(135deg, var(--consecrated-gold-dark), var(--consecrated-gold-light) 28%, var(--consecrated-gold) 52%, var(--consecrated-gold-dark)) border-box;
+  box-shadow: 0 0 0 1px rgba(212, 170, 72, 0.42), 0 5px 18px rgba(154, 107, 24, 0.3);
 }
 
-.member-card h3 { margin: 0 0 12px; font-size: 1.12rem; padding-right: 82px; }
+.member-card h3 { margin: 0 0 12px; font-size: 1.12rem; padding-right: 94px; }
 
 .member-photo {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
