@@ -338,7 +338,7 @@ section.view.active { display: block; }
 .collage-photo-two { top: 5%; right: 1%; width: 38%; height: 42%; transform: rotate(7deg); }
 .collage-photo-three { bottom: 3%; left: 1%; width: 47%; height: 32%; transform: rotate(6deg); }
 .collage-photo-four { right: 2%; bottom: 1%; width: 43%; height: 36%; transform: rotate(-7deg); }
-.collage-photo-five { top: 31%; left: 27%; z-index: 2; width: 47%; height: 36%; transform: rotate(-2deg); }
+.collage-photo-five { top: 31%; left: 20%; z-index: 2; width: 61%; height: 34%; transform: rotate(-2deg); }
 
 .welcome-copy-box {
   position: relative;
@@ -379,6 +379,13 @@ section.view.active { display: block; }
   line-height: 1.5;
 }
 
+.welcome-quote {
+  color: var(--text);
+  font-size: 0.9rem !important;
+  line-height: 1.45 !important;
+  margin: -8px 0 22px !important;
+}
+
 .welcome-cta { display: inline-flex; align-items: center; gap: 12px; }
 .welcome-cta span { font-size: 1.2rem; line-height: 1; }
 
@@ -390,7 +397,7 @@ section.view.active { display: block; }
   .collage-photo-two { top: 5%; right: -8%; width: 38%; height: 42%; }
   .collage-photo-three { bottom: 3%; left: -7%; width: 47%; height: 32%; }
   .collage-photo-four { right: -7%; bottom: 1%; width: 43%; height: 36%; }
-  .collage-photo-five { top: 31%; left: 23%; width: 54%; height: 34%; }
+  .collage-photo-five { top: 31%; left: 16%; width: 68%; height: 32%; }
   .welcome-copy-box { width: min(88%, 520px); margin: -18px auto 0; padding: 24px 20px; text-align: center; }
   .welcome-copy h2 { font-size: 2.25rem; }
   .welcome-copy > p:not(.welcome-kicker) { font-size: 0.92rem; line-height: 1.5; }
