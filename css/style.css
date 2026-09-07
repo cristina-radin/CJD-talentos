@@ -330,9 +330,17 @@ section.view.active { display: block; }
   border: 8px solid var(--surface);
   box-shadow: 0 12px 28px rgba(62, 36, 21, 0.2);
   filter: saturate(0.85);
+  transition: scale 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .collage-photo[hidden] { display: none; }
+
+.collage-photo:hover {
+  scale: 1.08;
+  z-index: 3;
+  box-shadow: 0 18px 34px rgba(62, 36, 21, 0.3);
+  filter: saturate(1);
+}
 
 .collage-photo-one { top: 1%; left: 2%; width: 46%; height: 38%; transform: rotate(-8deg); }
 .collage-photo-two { top: 5%; right: 1%; width: 38%; height: 42%; transform: rotate(7deg); }
@@ -385,6 +393,8 @@ section.view.active { display: block; }
   line-height: 1.45 !important;
   margin: -8px 0 22px !important;
 }
+
+.welcome-quote span { margin-left: 8px; }
 
 .welcome-cta { display: inline-flex; align-items: center; gap: 12px; }
 .welcome-cta span { font-size: 1.2rem; line-height: 1; }
