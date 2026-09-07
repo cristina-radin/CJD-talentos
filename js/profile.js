@@ -177,6 +177,7 @@ function formHtml(m, options, isAdminEditing) {
               <img id="p-foto-preview" class="photo-preview" src="${m.foto_url ?? ''}" alt="" style="${m.foto_url ? '' : 'display:none'}" />
               ${isAdminEditing ? '' : '<input type="file" id="p-foto-input" accept="image/*" />'}
             </div>
+            <p class="form-hint">¡Anímate a poner una foto divertida!</p>
             <div class="msg" id="p-foto-msg"></div>
           </div>
           <div>
@@ -253,7 +254,7 @@ function formHtml(m, options, isAdminEditing) {
           <div class="checkbox-row">
             <label for="p-ocd">
               <input type="checkbox" id="p-ocd" ${m.ocd ? 'checked' : ''} />
-              OCD
+              ¿Vida Consagrada?
             </label>
           </div>
           <div class="full">

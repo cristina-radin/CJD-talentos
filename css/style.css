@@ -2,7 +2,7 @@
   --bg: #fbf4e4;
   --surface: #ffffff;
   --border: #e3d5b8;
-  --card-border: #bda987;
+  --card-border: #8f6546;
   --consecrated-gold-dark: #9a6b18;
   --consecrated-gold: #d4aa48;
   --consecrated-gold-light: #ecd27f;
@@ -86,7 +86,7 @@ a { color: var(--primary); }
 .logo-watermark img {
   width: min(60vw, 640px);
   opacity: 0.22;
-  transform: translateY(4vh);
+  transform: translateY(10vh);
 }
 
 .center-screen {
@@ -520,7 +520,7 @@ dialog.lightbox img {
 
 .card-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
