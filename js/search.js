@@ -114,7 +114,7 @@ function renderFilters() {
   ocdWrap.className = 'field';
   ocdWrap.style.gridColumn = '1 / -1';
   ocdWrap.innerHTML = `
-    <label>OCD</label>
+    <label>Vida consagrada</label>
     <div class="checkbox-row">
       <label><input type="checkbox" id="f-ocd" /></label>
     </div>
@@ -198,14 +198,19 @@ function lugarYFormacion(m) {
 function renderResults(members, keyword = '') {
   const grid = document.getElementById('search-results');
   const countLine = document.getElementById('search-count');
-  countLine.textContent = `${members.length} persona${members.length === 1 ? '' : 's'} encontrada${members.length === 1 ? '' : 's'}`;
+  const sortedMembers = [...members].sort((a, b) => {
+    const nameA = `${a.nombre ?? ''} ${a.apellidos ?? ''}`.trim();
+    const nameB = `${b.nombre ?? ''} ${b.apellidos ?? ''}`.trim();
+    return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+  });
+  countLine.textContent = `${sortedMembers.length} persona${sortedMembers.length === 1 ? '' : 's'} encontrada${sortedMembers.length === 1 ? '' : 's'}`;
 
-  if (members.length === 0) {
+  if (sortedMembers.length === 0) {
     grid.innerHTML = '<div class="empty-state">Nadie coincide con estos filtros.</div>';
     return;
   }
 
-  grid.innerHTML = members
+  grid.innerHTML = sortedMembers
     .map((m) => {
       const estilos = Array.isArray(m.estilos) ? m.estilos : [];
       const { lugar, formacion } = lugarYFormacion(m);
@@ -218,7 +223,7 @@ function renderResults(members, keyword = '') {
           ${lugar ? `<div class="meta">${lugar}</div>` : ''}
           ${formacion ? `<div class="meta">${formacion}</div>` : ''}
           ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-          ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
+          ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">Vida consagrada</span>' : ''}</div>` : ''}
           ${revealFields.map(({ key, label }) => `<div class="card-section"><span class="card-label">${label}</span><p>${m[key]}</p></div>`).join('')}
         </div>
       `;
@@ -251,7 +256,7 @@ function renderFullDetail(m) {
     ${lugar ? `<div class="meta">${lugar}</div>` : ''}
     ${formacion ? `<div class="meta">${formacion}</div>` : ''}
     ${m.coche ? `<div class="meta">${toSentenceCase(m.coche)}</div>` : ''}
-    ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">OCD</span>' : ''}</div>` : ''}
+    ${estilos.length || m.ocd ? `<div class="tag-list">${estilos.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')}${m.ocd ? '<span class="tag">Vida consagrada</span>' : ''}</div>` : ''}
     ${idiomas.length ? `<div class="tag-list">${idiomas.map((i) => `<span class="tag tag-outline">${formatIdiomaEntry(i)}</span>`).join('')}</div>` : ''}
     ${m.experiencia ? `<div class="card-section"><span class="card-label">Experiencia</span><p>${m.experiencia}</p></div>` : ''}
     ${m.hobbies ? `<div class="card-section"><span class="card-label">Hobbies</span><p>${m.hobbies}</p></div>` : ''}
