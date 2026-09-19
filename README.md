@@ -83,12 +83,20 @@ that live in Supabase, not in this repo. In order:
             disponibilidad, habilidades_humanas, habilidades_cristianas,
             observaciones_publicas, ocd
      from members
-     where is_member(auth.jwt() ->> 'email')
-        or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email');
+     where (is_member(auth.jwt() ->> 'email')
+        or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email'))
+       and not exists (
+         select 1 from consentimientos c
+         where c.email = members.email and c.revocado_en is not null
+       );
    $$;
 
    grant execute on function get_directory() to authenticated;
    ```
+
+   The `consentimientos` join means this must run *after* step 11 creates
+   that table (drop the last line's `and not exists (...)` clause if you're
+   setting this up before step 11 for some reason).
 
    If you're updating an existing `get_directory()` whose return type
    doesn't match, `create or replace` will fail with "cannot change return
@@ -165,35 +173,44 @@ that live in Supabase, not in this repo. In order:
    ```
 
 7. **`list_signups()`** — admin-only listing of Auth accounts (used by the
-   "Cuentas registradas" tab), flags accounts with no matching `members` row.
-   **Note:** the version actually deployed also returns `ficha_actualizada_en`
-   (used by `js/admin.js`), which isn't reflected below — this doc has drifted
-   from the live function at some point. Before replacing it, pull the real
-   definition with `select pg_get_functiondef('list_signups'::regproc);` so
-   you don't silently drop a column, the way `get_directory()` lost `ocd` and
-   others earlier:
+   "Cuentas registradas" tab): flags accounts with no matching `members` row,
+   when their ficha was last updated, and whether they've accepted (and not
+   withdrawn) the data-use consent from `consentimientos` (step 11):
    ```sql
-   create or replace function list_signups()
-   returns table (email text, created_at timestamptz, confirmado boolean, tiene_ficha boolean)
+   drop function if exists list_signups();
+
+   create or replace function public.list_signups()
+   returns table(
+     email text, created_at timestamptz, confirmado boolean, tiene_ficha boolean,
+     ficha_actualizada_en timestamptz, acepta_datos boolean, acepta_datos_en timestamptz
+   )
    language plpgsql
    security definer
-   set search_path = public, auth
-   as $$
+   set search_path to 'public', 'auth'
+   as $function$
    begin
      if not exists (select 1 from admins where admins.email = auth.jwt() ->> 'email') then
-       raise exception 'Not authorized';
+       raise exception 'No autorizado';
      end if;
 
      return query
      select u.email::text, u.created_at, (u.confirmed_at is not null) as confirmado,
-            exists (select 1 from members m where m.email = u.email) as tiene_ficha
+            (m.email is not null) as tiene_ficha,
+            m.updated_at,
+            (c.user_id is not null and c.revocado_en is null) as acepta_datos,
+            c.aceptado_en
      from auth.users u
+     left join members m on m.email = u.email
+     left join consentimientos c on c.user_id = u.id
      order by u.created_at desc;
    end;
-   $$;
+   $function$;
 
    grant execute on function list_signups() to authenticated;
    ```
+
+   `consentimientos` must exist before running this (see step 11) — it's
+   referenced in the join.
 
 8. **Photo storage** — Storage → Create bucket named `fotos`, marked
    **public**. Then:
@@ -287,18 +304,9 @@ that live in Supabase, not in this repo. In order:
 
     People who already had an account before this shipped won't have a row
     here yet — they'll see the consent dialog the next time they log in,
-    which is expected.
-
-    Once this table exists, `get_directory()` also needs to stop returning
-    rows for anyone who withdrew consent — add this to its `where` clause
-    (see the note in step 3, same caveat about pulling the real current
-    definition first before replacing it):
-    ```sql
-    and not exists (
-      select 1 from consentimientos c
-      where c.email = members.email and c.revocado_en is not null
-    )
-    ```
+    which is expected. This table must exist before running the
+    `get_directory()` (step 3) and `list_signups()` (step 7) definitions
+    above, since both reference it.
 
 Sanity check anytime with:
 ```sql
