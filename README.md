@@ -70,14 +70,18 @@ that live in Supabase, not in this repo. In order:
    returns table (
      id uuid, nombre text, apellidos text, ciudad text, area_titulacion text,
      titulacion text, estilos text[], idiomas jsonb, coche text,
-     experiencia text, hobbies text, grupo text, foto_url text
+     experiencia text, hobbies text, grupo text, foto_url text,
+     disponibilidad text, habilidades_humanas text, habilidades_cristianas text,
+     observaciones_publicas text, ocd boolean
    )
    language sql
    security definer
    set search_path = public
    as $$
      select id, nombre, apellidos, ciudad, area_titulacion, titulacion,
-            estilos, idiomas, coche, experiencia, hobbies, grupo, foto_url
+            estilos, idiomas, coche, experiencia, hobbies, grupo, foto_url,
+            disponibilidad, habilidades_humanas, habilidades_cristianas,
+            observaciones_publicas, ocd
      from members
      where is_member(auth.jwt() ->> 'email')
         or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email');
@@ -85,6 +89,11 @@ that live in Supabase, not in this repo. In order:
 
    grant execute on function get_directory() to authenticated;
    ```
+
+   If you're updating an existing `get_directory()` whose return type
+   doesn't match, `create or replace` will fail with "cannot change return
+   type of existing function" — run `drop function if exists get_directory();`
+   first.
 
 4. **`get_distinct_alergias()`** — anonymized list of allergy values already
    in use (no id/email attached), used to populate a quick-pick dropdown in
