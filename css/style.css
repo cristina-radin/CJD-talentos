@@ -725,7 +725,8 @@ table.admin-table td.sensitive { background: var(--danger-bg); }
 }
 
 .admin-sort-btn:hover { color: var(--primary); }
-.admin-sort-btn .sort-arrow { color: var(--primary); margin-left: 2px; }
+.admin-sort-btn .sort-arrow { color: var(--text-muted); margin-left: 2px; }
+.admin-sort-btn.active .sort-arrow { color: var(--primary); }
 
 dialog.member-dialog {
   border: none;

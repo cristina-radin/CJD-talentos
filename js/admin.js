@@ -57,8 +57,8 @@ function compareRows(a, b, key) {
 
 function sortHeader(key, label) {
   const active = sortState.key === key;
-  const arrow = active ? `<span class="sort-arrow">${sortState.dir === 'asc' ? '▲' : '▼'}</span>` : '';
-  return `<th><button type="button" class="admin-sort-btn" data-sort="${key}">${label}${arrow}</button></th>`;
+  const icon = active ? (sortState.dir === 'asc' ? '▲' : '▼') : '⇅';
+  return `<th><button type="button" class="admin-sort-btn${active ? ' active' : ''}" data-sort="${key}">${label} <span class="sort-arrow">${icon}</span></button></th>`;
 }
 
 function distinctValues(rows, field) {
