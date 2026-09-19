@@ -40,11 +40,12 @@ export async function ensureConsent(session) {
     .eq('user_id', session.user.id)
     .maybeSingle();
 
-  if (error) {
-    console.error('No se pudo comprobar el consentimiento de datos:', error.message);
-    return;
-  }
-  if (data && !data.revocado_en) return;
+  // Si no se puede comprobar (tabla sin crear, RLS mal puesta, red…), no
+  // dejamos pasar en silencio: mostramos el diálogo igualmente, para que el
+  // fallo sea visible (al aceptar, el mismo error saldrá en el diálogo) en
+  // vez de que la app deje entrar a todo el mundo sin darse cuenta.
+  if (error) console.error('No se pudo comprobar el consentimiento de datos:', error.message);
+  if (!error && data && !data.revocado_en) return;
 
   const dialog = ensureDialog();
   const checkbox = dialog.querySelector('#consent-checkbox');
