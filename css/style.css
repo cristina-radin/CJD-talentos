@@ -728,6 +728,34 @@ table.admin-table td.sensitive { background: var(--danger-bg); }
 .admin-sort-btn .sort-arrow { color: var(--text-muted); margin-left: 2px; }
 .admin-sort-btn.active .sort-arrow { color: var(--primary); }
 
+dialog.consent-dialog {
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  max-width: 480px;
+  width: 92%;
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+dialog.consent-dialog::backdrop { background: rgba(62, 36, 21, 0.6); }
+
+dialog.consent-dialog h2 { margin-top: 0; color: var(--heading); }
+
+dialog.consent-dialog p { color: var(--text-muted); line-height: 1.6; }
+
+.consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 500;
+  margin: 16px 0;
+  cursor: pointer;
+}
+
+.consent-checkbox input { width: auto; margin-top: 3px; }
+
 dialog.member-dialog {
   border: none;
   border-radius: var(--radius);

@@ -345,6 +345,7 @@ async function renderSignupsPanel(panel) {
             <th>Email confirmado</th>
             <th>Tiene ficha</th>
             <th>Última modificación de la ficha</th>
+            <th>Acepta uso de datos</th>
           </tr>
         </thead>
         <tbody>
@@ -357,6 +358,7 @@ async function renderSignupsPanel(panel) {
               <td>${r.confirmado ? 'Sí' : 'No'}</td>
               <td class="${r.tiene_ficha ? '' : 'sensitive'}">${r.tiene_ficha ? 'Sí' : 'No'}</td>
               <td>${formatDate(r.ficha_actualizada_en) || '—'}</td>
+              <td class="${r.acepta_datos ? '' : 'sensitive'}" title="${formatDate(r.acepta_datos_en)}">${r.acepta_datos ? 'Sí' : 'No'}</td>
             </tr>`
             )
             .join('')}

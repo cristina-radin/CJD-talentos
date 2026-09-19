@@ -4,6 +4,7 @@ import { initProfile } from './profile.js';
 import { initAdmin } from './admin.js';
 import { initThemeToggle } from './theme.js';
 import { supabase } from './supabaseClient.js';
+import { ensureConsent } from './consent.js';
 
 initThemeToggle('theme-toggle-btn');
 
@@ -70,6 +71,8 @@ async function main() {
 
   document.getElementById('user-email').textContent = session.user.email;
   document.getElementById('logout-btn').addEventListener('click', logout);
+
+  await ensureConsent(session);
 
   const admin = await checkIsAdmin(session.user.email);
   if (admin) document.getElementById('tab-admin-btn').hidden = false;

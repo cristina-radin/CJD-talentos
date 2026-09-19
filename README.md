@@ -165,7 +165,13 @@ that live in Supabase, not in this repo. In order:
    ```
 
 7. **`list_signups()`** — admin-only listing of Auth accounts (used by the
-   "Cuentas registradas" tab), flags accounts with no matching `members` row:
+   "Cuentas registradas" tab), flags accounts with no matching `members` row.
+   **Note:** the version actually deployed also returns `ficha_actualizada_en`
+   (used by `js/admin.js`), which isn't reflected below — this doc has drifted
+   from the live function at some point. Before replacing it, pull the real
+   definition with `select pg_get_functiondef('list_signups'::regproc);` so
+   you don't silently drop a column, the way `get_directory()` lost `ocd` and
+   others earlier:
    ```sql
    create or replace function list_signups()
    returns table (email text, created_at timestamptz, confirmado boolean, tiene_ficha boolean)
@@ -241,6 +247,35 @@ that live in Supabase, not in this repo. In order:
     (each person confirms from their inbox) or turn it off under
     **Authentication → Providers → Email → Confirm email**. The app handles
     either case.
+
+11. **`consentimientos` table** — records that a member accepted having
+    their data shown in the directory. `js/consent.js` blocks the app behind
+    a dialog until a row exists for the logged-in user; `list_signups()`
+    (once extended, see the note in step 7) surfaces it in the admin
+    "Cuentas registradas" tab as `acepta_datos` / `acepta_datos_en`:
+    ```sql
+    create table if not exists consentimientos (
+      user_id uuid primary key references auth.users(id) on delete cascade,
+      email text not null,
+      aceptado_en timestamptz not null default now()
+    );
+
+    alter table consentimientos enable row level security;
+
+    create policy "users insert their own consent"
+      on consentimientos for insert
+      to authenticated
+      with check (auth.uid() = user_id);
+
+    create policy "users read their own consent"
+      on consentimientos for select
+      to authenticated
+      using (auth.uid() = user_id);
+    ```
+
+    People who already had an account before this shipped won't have a row
+    here yet — they'll see the consent dialog the next time they log in,
+    which is expected.
 
 Sanity check anytime with:
 ```sql
