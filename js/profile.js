@@ -167,6 +167,7 @@ function formHtml(m, options, isAdminEditing) {
 
   return `
     <form id="profile-form">
+      <div class="msg" id="profile-msg-top"></div>
       <p class="form-hint hint-important"><span class="hint-important-icon" aria-hidden="true">&#9888;&#65039;</span> Escribe con la letra inicial en mayúscula y usa los acentos correspondientes. Fíjate en las fichas ya completadas y en las opciones que ya aparecen en los desplegables para escribir de forma parecida. Si quitas el contenido de una caja de descripción, verás ejemplos de qué escribir.</p>
       <fieldset>
         <legend>Datos del directorio</legend>
@@ -332,9 +333,11 @@ function formHtml(m, options, isAdminEditing) {
 }
 
 function showMsg(text, isError) {
-  const el = document.getElementById('profile-msg');
-  el.textContent = text;
-  el.className = 'msg show ' + (isError ? 'error' : 'ok');
+  ['profile-msg-top', 'profile-msg'].forEach((id) => {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg show ' + (isError ? 'error' : 'ok');
+  });
 }
 
 export async function initProfile(session, opts = {}) {
