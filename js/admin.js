@@ -34,14 +34,21 @@ const SENSITIVE_COLUMNS = [
 
 let sortState = { key: 'nombre', dir: 'asc' };
 
+// nacimiento se guarda como texto "DD/MM/AAAA" (ver js/profile.js), no ISO,
+// así que new Date(...) lo interpretaría mal (formato mes/día americano).
+function nacimientoSortValue(value) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value ?? '');
+  if (!match) return -Infinity;
+  const [, dia, mes, anio] = match;
+  return Number(`${anio}${mes}${dia}`);
+}
+
 function compareRows(a, b, key) {
   if (key === 'es_menor') {
     return (a.es_menor ? 1 : 0) - (b.es_menor ? 1 : 0);
   }
   if (key === 'nacimiento') {
-    const av = a.nacimiento ? new Date(a.nacimiento).getTime() : -Infinity;
-    const bv = b.nacimiento ? new Date(b.nacimiento).getTime() : -Infinity;
-    return av - bv;
+    return nacimientoSortValue(a.nacimiento) - nacimientoSortValue(b.nacimiento);
   }
   const an = `${a.apellidos ?? ''} ${a.nombre ?? ''}`.trim();
   const bn = `${b.apellidos ?? ''} ${b.nombre ?? ''}`.trim();
