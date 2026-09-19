@@ -1,4 +1,4 @@
-import { ESTILOS_LABELS, ASOCIACION_LABELS } from './config.js';
+import { ESTILOS_LABELS, GRUPO_LABELS } from './config.js';
 
 // "José" -> "jose". Para comparar texto libre en buscadores sin que los
 // acentos importen (quien busca "jose" debe encontrar a "José").
@@ -21,8 +21,8 @@ export function estiloLabel(estilo) {
   return ESTILOS_LABELS[estilo] ?? toSentenceCase(estilo);
 }
 
-export function asociacionLabel(asociacion) {
-  return ASOCIACION_LABELS[asociacion] ?? toSentenceCase(asociacion);
+export function grupoLabel(grupo) {
+  return GRUPO_LABELS[grupo] ?? toSentenceCase(grupo);
 }
 
 // `idiomas` es JSONB: cada entrada es { n: "Inglés", nivel: "Avanzado" }.

@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
-import { estiloLabel, formatIdiomaEntry, asociacionLabel, toSentenceCase } from './format.js';
+import { ESTILOS, GRUPOS, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
+import { estiloLabel, formatIdiomaEntry, grupoLabel, toSentenceCase } from './format.js';
 
 let idiomasList = [];
 let alergiasList = [];
@@ -161,8 +161,8 @@ function formHtml(m, options, isAdminEditing) {
       ? estilosActuales.map((e) => `<span class="tag">${estiloLabel(e)}</span>`).join('')
       : '<span class="empty-state" style="padding:0">Sin asignar</span>';
 
-  const asociacionOptions = ASOCIACIONES.map(
-    (a) => `<option value="${a}" ${m.asociacion === a ? 'selected' : ''}>${asociacionLabel(a)}</option>`
+  const grupoOptions = GRUPOS.map(
+    (g) => `<option value="${g}" ${m.grupo === g ? 'selected' : ''}>${grupoLabel(g)}</option>`
   ).join('');
 
   return `
@@ -190,7 +190,7 @@ function formHtml(m, options, isAdminEditing) {
             <label for="p-apellidos">Apellidos</label>
             <input type="text" id="p-apellidos" required value="${m.apellidos ?? ''}" />
           </div>
-          ${comboFieldHtml('p-ciudad', 'Ciudad', options.ciudad, m.ciudad)}
+          ${comboFieldHtml('p-ciudad', 'Ciudad de residencia', options.ciudad, m.ciudad)}
           <div>
             <label for="p-coche">Coche</label>
             <select id="p-coche" required>
@@ -198,10 +198,10 @@ function formHtml(m, options, isAdminEditing) {
             </select>
           </div>
           <div>
-            <label for="p-asociacion">Asociación</label>
-            <select id="p-asociacion">
+            <label for="p-grupo">Grupo</label>
+            <select id="p-grupo">
               <option value="">Sin especificar</option>
-              ${asociacionOptions}
+              ${grupoOptions}
             </select>
           </div>
           <div>
@@ -553,7 +553,7 @@ export async function initProfile(session, opts = {}) {
       apellidos: document.getElementById('p-apellidos').value.trim(),
       ciudad: comboFieldValue('p-ciudad'),
       coche: document.getElementById('p-coche').value || null,
-      asociacion: document.getElementById('p-asociacion').value || null,
+      grupo: document.getElementById('p-grupo').value || null,
       area_titulacion: document.getElementById('p-area').value || null,
       titulacion: titulacionesList.length ? titulacionesList.join(', ') : null,
       experiencia: document.getElementById('p-experiencia').value.trim() || null,

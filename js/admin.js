@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel, normalizeText } from './format.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, grupoLabel, normalizeText } from './format.js';
 import { openLightbox } from './lightbox.js';
 import { initProfile } from './profile.js';
 
@@ -83,8 +83,8 @@ function renderDetail(row) {
     <fieldset>
       <legend>Datos del directorio</legend>
       <div class="form-grid">
-        ${detailField('Ciudad', row.ciudad)}
-        ${detailField('Asociación', row.asociacion ? asociacionLabel(row.asociacion) : '')}
+        ${detailField('Ciudad de residencia', row.ciudad)}
+        ${detailField('Grupo', row.grupo ? grupoLabel(row.grupo) : '')}
         ${detailField('Área de titulación', row.area_titulacion)}
         ${detailField('Titulación', row.titulacion)}
         ${detailField('Coche', row.coche ? toSentenceCase(row.coche) : '')}
@@ -188,7 +188,7 @@ function renderTable(rows) {
     <tr>
       <th>Nombre</th>
       <th>Email</th>
-      <th>Asociación</th>
+      <th>Grupo</th>
       ${SENSITIVE_COLUMNS.map((c) => `<th>${c.label}</th>`).join('')}
     </tr>`;
   const body = rows
@@ -197,7 +197,7 @@ function renderTable(rows) {
     <tr>
       <td><button type="button" class="admin-name-link" data-id="${row.id}">${row.apellidos ?? ''}, ${row.nombre ?? ''}</button></td>
       <td>${row.email ?? ''}</td>
-      <td>${row.asociacion ? asociacionLabel(row.asociacion) : ''}</td>
+      <td>${row.grupo ? grupoLabel(row.grupo) : ''}</td>
       ${SENSITIVE_COLUMNS.map((c) => `<td class="sensitive">${c.format ? c.format(row[c.key]) : (row[c.key] ?? '')}</td>`).join('')}
     </tr>`;
     })
@@ -214,11 +214,11 @@ function renderTable(rows) {
 function applyFilters() {
   const q = document.getElementById('admin-search').value.trim().toLowerCase();
   const ciudad = document.getElementById('admin-ciudad').value;
-  const asociacion = document.getElementById('admin-asociacion').value;
+  const grupo = document.getElementById('admin-grupo').value;
 
   const filtered = allMembers.filter((row) => {
     if (ciudad && row.ciudad !== ciudad) return false;
-    if (asociacion && row.asociacion !== asociacion) return false;
+    if (grupo && row.grupo !== grupo) return false;
     if (q && !matchesText(row, q)) return false;
     return true;
   });
@@ -247,8 +247,8 @@ async function renderFichasPanel(panel) {
   const ciudadOptions = distinctValues(allMembers, 'ciudad')
     .map((c) => `<option value="${c}">${c}</option>`)
     .join('');
-  const asociacionOptions = distinctValues(allMembers, 'asociacion')
-    .map((a) => `<option value="${a}">${asociacionLabel(a)}</option>`)
+  const grupoOptions = distinctValues(allMembers, 'grupo')
+    .map((g) => `<option value="${g}">${grupoLabel(g)}</option>`)
     .join('');
 
   panel.innerHTML = `
@@ -258,12 +258,12 @@ async function renderFichasPanel(panel) {
         <input type="text" id="admin-search" placeholder="Nombre, ciudad, idioma…" />
       </div>
       <div class="field">
-        <label for="admin-ciudad">Ciudad</label>
+        <label for="admin-ciudad">Ciudad de residencia</label>
         <select id="admin-ciudad"><option value="">Todas</option>${ciudadOptions}</select>
       </div>
       <div class="field">
-        <label for="admin-asociacion">Asociación</label>
-        <select id="admin-asociacion"><option value="">Todas</option>${asociacionOptions}</select>
+        <label for="admin-grupo">Grupo</label>
+        <select id="admin-grupo"><option value="">Todos</option>${grupoOptions}</select>
       </div>
     </div>
     <div id="admin-table-box"></div>
@@ -272,7 +272,7 @@ async function renderFichasPanel(panel) {
 
   document.getElementById('admin-search').addEventListener('input', applyFilters);
   document.getElementById('admin-ciudad').addEventListener('change', applyFilters);
-  document.getElementById('admin-asociacion').addEventListener('change', applyFilters);
+  document.getElementById('admin-grupo').addEventListener('change', applyFilters);
 
   applyFilters();
 }

@@ -16,14 +16,26 @@ export const ESTILOS_LABELS = {
   ORGANIZADO: 'Organizado',
 };
 
-// Asociación regional. Igual que ESTILOS: el valor se guarda tal cual en la
+// Grupo local. Igual que ESTILOS: el valor se guarda tal cual en la
 // base de datos, la etiqueta es solo para mostrar.
-export const ASOCIACIONES = ['LEVANTE', 'ANDALUCIA', 'MADRID'];
+export const GRUPOS = [
+  'CASTELLON',
+  'VALENCIA_PARROQUIA',
+  'VALENCIA_CONVENTO',
+  'SATELITES',
+  'SEVILLA',
+  'SAN_FERNANDO',
+  'CORDOBA',
+];
 
-export const ASOCIACION_LABELS = {
-  LEVANTE: 'Levante',
-  ANDALUCIA: 'Andalucía',
-  MADRID: 'Madrid',
+export const GRUPO_LABELS = {
+  CASTELLON: 'Castellón',
+  VALENCIA_PARROQUIA: 'Valencia Parroquia',
+  VALENCIA_CONVENTO: 'Valencia Convento',
+  SATELITES: 'Satélites',
+  SEVILLA: 'Sevilla',
+  SAN_FERNANDO: 'San Fernando',
+  CORDOBA: 'Córdoba',
 };
 
 // Niveles fijos de idioma, para que el filtro de búsqueda pueda comparar

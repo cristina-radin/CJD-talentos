@@ -13,10 +13,10 @@ this README and commit history are in English.
 index.html            Login + sign-up (Supabase Auth)
 app.html               Main app shell: Search / My profile / Admin
 css/style.css           Styles (brand colors, fonts, layout)
-js/config.js            Supabase URL/key, fixed option lists (estilos, asociaciones, niveles)
+js/config.js            Supabase URL/key, fixed option lists (estilos, grupos, niveles)
 js/supabaseClient.js    supabase-js client (session stored in sessionStorage, cleared on tab close)
 js/auth.js              Session helpers, logout, admin check
-js/format.js            Display formatting (idiomas, estilos, coche, asociación)
+js/format.js            Display formatting (idiomas, estilos, coche, grupo)
 js/lightbox.js          Shared click-to-enlarge photo viewer
 js/login.js             Logic for index.html
 js/app.js               Coordinator for app.html (tab switching)
@@ -70,14 +70,14 @@ that live in Supabase, not in this repo. In order:
    returns table (
      id uuid, nombre text, apellidos text, ciudad text, area_titulacion text,
      titulacion text, estilos text[], idiomas jsonb, coche text,
-     experiencia text, hobbies text, asociacion text, foto_url text
+     experiencia text, hobbies text, grupo text, foto_url text
    )
    language sql
    security definer
    set search_path = public
    as $$
      select id, nombre, apellidos, ciudad, area_titulacion, titulacion,
-            estilos, idiomas, coche, experiencia, hobbies, asociacion, foto_url
+            estilos, idiomas, coche, experiencia, hobbies, grupo, foto_url
      from members
      where is_member(auth.jwt() ->> 'email')
         or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email');
@@ -202,10 +202,29 @@ that live in Supabase, not in this repo. In order:
    );
    ```
 
-9. **`asociacion` column** (regional chapter: Levante / Andalucía / Madrid):
+9. **`grupo` column** (local group: Castellón / Valencia Parroquia / Valencia
+   Convento / Satélites / Sevilla / San Fernando / Córdoba). This replaces
+   the older `asociacion` column (Levante / Andalucía / Madrid) — if you
+   still have that column, rename it and swap its check constraint; existing
+   values won't match the new set, so they'll need to be reassigned by hand
+   afterwards:
    ```sql
+   -- Fresh install:
    alter table members
-     add column asociacion text check (asociacion in ('LEVANTE', 'ANDALUCIA', 'MADRID'));
+     add column grupo text check (grupo in (
+       'CASTELLON', 'VALENCIA_PARROQUIA', 'VALENCIA_CONVENTO',
+       'SATELITES', 'SEVILLA', 'SAN_FERNANDO', 'CORDOBA'
+     ));
+
+   -- Migrating from the old `asociacion` column instead:
+   alter table members rename column asociacion to grupo;
+   alter table members drop constraint if exists members_asociacion_check;
+   update members set grupo = null; -- old values don't map to the new groups
+   alter table members add constraint members_grupo_check
+     check (grupo in (
+       'CASTELLON', 'VALENCIA_PARROQUIA', 'VALENCIA_CONVENTO',
+       'SATELITES', 'SEVILLA', 'SAN_FERNANDO', 'CORDOBA'
+     ));
    ```
 
 10. **Email confirmation on sign-up.** Supabase Auth requires email

@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js';
-import { ESTILOS, ASOCIACIONES, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
-import { estiloLabel, formatIdiomaEntry, toSentenceCase, asociacionLabel, normalizeText } from './format.js';
+import { ESTILOS, GRUPOS, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
+import { estiloLabel, formatIdiomaEntry, toSentenceCase, grupoLabel, normalizeText } from './format.js';
 import { openLightbox } from './lightbox.js';
 
 let allMembers = [];
@@ -63,7 +63,7 @@ function renderFilters() {
 
   const { wrap: ciudadWrap, select: ciudadSelect } = buildSelect(
     'f-ciudad',
-    'Ciudad',
+    'Ciudad de residencia',
     distinctValues(allMembers, 'ciudad')
   );
   const { wrap: areaWrap, select: areaSelect } = buildSelect(
@@ -77,11 +77,11 @@ function renderFilters() {
     COCHE_OPCIONES,
     toSentenceCase
   );
-  const { wrap: asociacionWrap, select: asociacionSelect } = buildSelect(
-    'f-asociacion',
-    'Asociación',
-    ASOCIACIONES,
-    asociacionLabel
+  const { wrap: grupoWrap, select: grupoSelect } = buildSelect(
+    'f-grupo',
+    'Grupo',
+    GRUPOS,
+    grupoLabel
   );
 
   const idiomaWrap = document.createElement('div');
@@ -124,12 +124,12 @@ function renderFilters() {
   filtersEl.appendChild(ciudadWrap);
   filtersEl.appendChild(areaWrap);
   filtersEl.appendChild(cocheWrap);
-  filtersEl.appendChild(asociacionWrap);
+  filtersEl.appendChild(grupoWrap);
   filtersEl.appendChild(idiomaWrap);
   filtersEl.appendChild(estilosWrap);
   filtersEl.appendChild(ocdWrap);
 
-  [ciudadSelect, areaSelect, cocheSelect, asociacionSelect].forEach((sel) =>
+  [ciudadSelect, areaSelect, cocheSelect, grupoSelect].forEach((sel) =>
     sel.addEventListener('change', applyFilters)
   );
   document.getElementById('f-idioma').addEventListener('input', applyFilters);
@@ -160,7 +160,7 @@ function applyFilters() {
   const ciudad = document.getElementById('f-ciudad').value;
   const area = document.getElementById('f-area').value;
   const coche = document.getElementById('f-coche').value;
-  const asociacion = document.getElementById('f-asociacion').value;
+  const grupo = document.getElementById('f-grupo').value;
   const idioma = document.getElementById('f-idioma').value.trim().toLowerCase();
   const ocd = document.getElementById('f-ocd').checked;
 
@@ -169,7 +169,7 @@ function applyFilters() {
     if (ciudad && m.ciudad !== ciudad) return false;
     if (area && m.area_titulacion !== area) return false;
     if (coche && m.coche !== coche) return false;
-    if (asociacion && m.asociacion !== asociacion) return false;
+    if (grupo && m.grupo !== grupo) return false;
     if (ocd && !m.ocd) return false;
 
     if (idioma) {
@@ -190,7 +190,7 @@ function applyFilters() {
 
 function lugarYFormacion(m) {
   const titulaciones = m.titulacion ? m.titulacion.split(',').map((t) => t.trim()).filter(Boolean) : [];
-  const lugar = [m.ciudad, m.asociacion ? asociacionLabel(m.asociacion) : null].filter(Boolean).join(' · ');
+  const lugar = [m.ciudad, m.grupo ? grupoLabel(m.grupo) : null].filter(Boolean).join(' · ');
   const formacion = [m.area_titulacion, titulaciones.join(', ') || null].filter(Boolean).join(' · ');
   return { lugar, formacion };
 }
