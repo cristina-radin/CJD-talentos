@@ -249,16 +249,22 @@ that live in Supabase, not in this repo. In order:
     either case.
 
 11. **`consentimientos` table** — records that a member accepted having
-    their data shown in the directory. `js/consent.js` blocks the app behind
-    a dialog until a row exists for the logged-in user; `list_signups()`
-    (once extended, see the note in step 7) surfaces it in the admin
-    "Cuentas registradas" tab as `acepta_datos` / `acepta_datos_en`:
+    their data shown in the directory, and lets them withdraw that consent
+    later (`revocado_en`). `js/consent.js` blocks the app behind a dialog
+    until a row with `revocado_en is null` exists for the logged-in user,
+    and offers a "Retirar mi consentimiento de datos" link from "Mi ficha"
+    (`js/profile.js`) that sets `revocado_en`. `list_signups()` (once
+    extended, see the note in step 7) surfaces it in the admin "Cuentas
+    registradas" tab as `acepta_datos` / `acepta_datos_en`:
     ```sql
     create table if not exists consentimientos (
       user_id uuid primary key references auth.users(id) on delete cascade,
       email text not null,
-      aceptado_en timestamptz not null default now()
+      aceptado_en timestamptz not null default now(),
+      revocado_en timestamptz
     );
+    -- Si ya habías creado la tabla sin esta columna:
+    alter table consentimientos add column if not exists revocado_en timestamptz;
 
     alter table consentimientos enable row level security;
 
@@ -271,11 +277,28 @@ that live in Supabase, not in this repo. In order:
       on consentimientos for select
       to authenticated
       using (auth.uid() = user_id);
+
+    create policy "users update their own consent"
+      on consentimientos for update
+      to authenticated
+      using (auth.uid() = user_id)
+      with check (auth.uid() = user_id);
     ```
 
     People who already had an account before this shipped won't have a row
     here yet — they'll see the consent dialog the next time they log in,
     which is expected.
+
+    Once this table exists, `get_directory()` also needs to stop returning
+    rows for anyone who withdrew consent — add this to its `where` clause
+    (see the note in step 3, same caveat about pulling the real current
+    definition first before replacing it):
+    ```sql
+    and not exists (
+      select 1 from consentimientos c
+      where c.email = members.email and c.revocado_en is not null
+    )
+    ```
 
 Sanity check anytime with:
 ```sql

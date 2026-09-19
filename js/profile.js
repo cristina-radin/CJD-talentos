@@ -1,6 +1,8 @@
 import { supabase } from './supabaseClient.js';
 import { ESTILOS, GRUPOS, NIVELES_IDIOMA, COCHE_OPCIONES, AREAS_TITULACION } from './config.js';
 import { estiloLabel, formatIdiomaEntry, grupoLabel, toSentenceCase } from './format.js';
+import { withdrawConsent } from './consent.js';
+import { logout } from './auth.js';
 
 let idiomasList = [];
 let alergiasList = [];
@@ -329,6 +331,12 @@ function formHtml(m, options, isAdminEditing) {
       <div class="msg" id="profile-msg"></div>
       <button type="submit" class="btn" id="profile-submit">Guardar cambios</button>
     </form>
+    ${isAdminEditing ? '' : `
+      <p class="form-hint" style="margin-top:24px">
+        <a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a>
+        · <button type="button" class="link-btn" id="withdraw-consent-btn">Retirar mi consentimiento de datos</button>
+      </p>
+    `}
   `;
 }
 
@@ -423,6 +431,26 @@ export async function initProfile(session, opts = {}) {
   renderAlergiasTags();
   renderTitulacionesTags();
   ['p-ciudad'].forEach(wireComboField);
+
+  const withdrawBtn = document.getElementById('withdraw-consent-btn');
+  if (withdrawBtn) {
+    withdrawBtn.addEventListener('click', async () => {
+      const confirmado = confirm(
+        'Al retirar tu consentimiento, tu ficha dejará de ser visible para el resto de miembros ' +
+        'y se cerrará tu sesión. La próxima vez que entres, se te volverá a pedir que aceptes. ¿Continuar?'
+      );
+      if (!confirmado) return;
+
+      withdrawBtn.disabled = true;
+      const { error } = await withdrawConsent(session);
+      if (error) {
+        alert('No se pudo retirar el consentimiento: ' + error.message);
+        withdrawBtn.disabled = false;
+        return;
+      }
+      await logout();
+    });
+  }
 
   ['p-nacimiento-dia', 'p-nacimiento-mes', 'p-nacimiento-anio'].forEach((id) => {
     document.getElementById(id).addEventListener('change', () => {

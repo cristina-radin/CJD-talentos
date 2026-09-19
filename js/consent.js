@@ -4,7 +4,9 @@ const CONSENT_TEXT =
   'Para poder ver tu ficha y que el resto de miembros la encuentren, necesitamos tu ' +
   'consentimiento para tratar los datos que rellenes (nombre, formación, idiomas, foto, etc.) ' +
   'y mostrarlos dentro de esta bolsa de talentos al resto de miembros del Carmelo Joven Descalzo. ' +
-  'Los datos sensibles (teléfono, DNI, domicilio, alergias, observaciones privadas) solo los ve el equipo de administración.';
+  'Los datos sensibles (teléfono, DNI, domicilio, alergias, observaciones privadas) solo los ve el equipo de administración. ' +
+  'Puedes leer el detalle completo en la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>, ' +
+  'y retirar este consentimiento cuando quieras desde "Mi ficha".';
 
 let dialogEl = null;
 
@@ -28,13 +30,13 @@ function ensureDialog() {
   return dialogEl;
 }
 
-// Comprueba si esta cuenta ya aceptó el uso de datos y, si no, bloquea la
-// app con un diálogo hasta que lo haga. Se llama al principio de app.js,
-// antes de enseñar cualquier vista.
+// Comprueba si esta cuenta ya aceptó el uso de datos (y no lo ha retirado
+// después) y, si no, bloquea la app con un diálogo hasta que lo haga. Se
+// llama al principio de app.js, antes de enseñar cualquier vista.
 export async function ensureConsent(session) {
   const { data, error } = await supabase
     .from('consentimientos')
-    .select('user_id')
+    .select('user_id, revocado_en')
     .eq('user_id', session.user.id)
     .maybeSingle();
 
@@ -42,7 +44,7 @@ export async function ensureConsent(session) {
     console.error('No se pudo comprobar el consentimiento de datos:', error.message);
     return;
   }
-  if (data) return;
+  if (data && !data.revocado_en) return;
 
   const dialog = ensureDialog();
   const checkbox = dialog.querySelector('#consent-checkbox');
@@ -59,12 +61,14 @@ export async function ensureConsent(session) {
     };
     acceptBtn.onclick = async () => {
       acceptBtn.disabled = true;
-      const { error: insertError } = await supabase
+      // upsert: si ya existía una fila (p.ej. de un consentimiento retirado),
+      // se reactiva en vez de chocar con la clave primaria.
+      const { error: upsertError } = await supabase
         .from('consentimientos')
-        .insert({ user_id: session.user.id, email: session.user.email });
+        .upsert({ user_id: session.user.id, email: session.user.email, aceptado_en: new Date().toISOString(), revocado_en: null });
 
-      if (insertError) {
-        msg.textContent = 'No se pudo guardar: ' + insertError.message;
+      if (upsertError) {
+        msg.textContent = 'No se pudo guardar: ' + upsertError.message;
         msg.className = 'msg show error';
         acceptBtn.disabled = false;
         return;
@@ -74,4 +78,16 @@ export async function ensureConsent(session) {
     };
     dialog.showModal();
   });
+}
+
+// Retira el consentimiento de la cuenta actual: a partir de ahora su ficha
+// deja de aparecer en el directorio y, la próxima vez que inicie sesión,
+// se le volverá a pedir que acepte.
+export async function withdrawConsent(session) {
+  const { error } = await supabase
+    .from('consentimientos')
+    .update({ revocado_en: new Date().toISOString() })
+    .eq('user_id', session.user.id);
+
+  return { error };
 }

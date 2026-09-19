@@ -333,6 +333,22 @@ section.view.active { display: block; }
 .access-pending h2 { margin-top: 0; color: var(--heading); }
 .access-pending p { color: var(--text-muted); line-height: 1.6; }
 
+.policy-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 16px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.policy-card { padding: 32px; }
+.policy-card .brand-lockup { margin-bottom: 24px; }
+.policy-card h2 { color: var(--heading); margin-top: 0; }
+.policy-card h3 { color: var(--heading); font-size: 1rem; margin: 24px 0 6px; }
+.policy-card p, .policy-card li { color: var(--text-muted); line-height: 1.6; }
+.policy-card ul { padding-left: 20px; margin: 6px 0; }
+.policy-back { margin-top: 28px; }
+
 .welcome-page {
   min-height: max(calc(100svh - 152px), 540px);
   display: grid;
@@ -723,6 +739,19 @@ table.admin-table td.sensitive { background: var(--danger-bg); }
   font-family: inherit;
   white-space: nowrap;
 }
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+.link-btn:hover { color: var(--primary); }
 
 .admin-sort-btn:hover { color: var(--primary); }
 .admin-sort-btn .sort-arrow { color: var(--text-muted); margin-left: 2px; }
