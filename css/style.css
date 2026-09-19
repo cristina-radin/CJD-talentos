@@ -414,7 +414,8 @@ section.view.active { display: block; }
 .welcome-cta span { font-size: 1.2rem; line-height: 1; }
 
 @media (max-width: 720px) {
-  .welcome-page { height: calc(100svh - 224px); min-height: 520px; display: block; }
+  body:has(#view-welcome.active) { overflow: auto; }
+  .welcome-page { height: auto; min-height: 520px; display: block; overflow: visible; }
   .welcome-collage { min-height: 280px; }
   .collage-photo { border-width: 5px; }
   .collage-photo-one { top: 1%; left: -7%; width: 45%; height: 38%; }
