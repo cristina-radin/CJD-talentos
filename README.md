@@ -300,6 +300,11 @@ that live in Supabase, not in this repo. In order:
       to authenticated
       using (auth.uid() = user_id)
       with check (auth.uid() = user_id);
+
+    -- RLS policies alone aren't enough — without this grant, authenticated
+    -- gets "permission denied for table consentimientos" on every query,
+    -- same as the members grant a few steps up.
+    grant select, insert, update on consentimientos to authenticated;
     ```
 
     People who already had an account before this shipped won't have a row
