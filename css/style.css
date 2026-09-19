@@ -173,6 +173,21 @@ input, select, textarea {
   color: var(--text);
 }
 
+/* macOS (Safari y Chrome) dibuja <select> con su propio "chrome" nativo,
+   que le da una altura/padding distintos a los de un <input> de texto
+   aunque compartan el mismo CSS. appearance:none lo quita y dibujamos
+   nosotros la flechita, para que todos los campos midan igual. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%237a5c42' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
 .password-field { position: relative; }
 
 .password-field input { padding-right: 42px; }
