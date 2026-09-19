@@ -23,11 +23,11 @@ function formatDate(value) {
 }
 
 const SENSITIVE_COLUMNS = [
+  { key: 'nacimiento', label: 'Nacimiento', sortKey: 'nacimiento' },
+  { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No'), sortKey: 'es_menor' },
   { key: 'telefono', label: 'Teléfono' },
   { key: 'nif', label: 'DNI' },
   { key: 'domicilio', label: 'Domicilio' },
-  { key: 'nacimiento', label: 'Nacimiento', sortKey: 'nacimiento' },
-  { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No'), sortKey: 'es_menor' },
   { key: 'alergias', label: 'Alergias' },
   { key: 'observaciones', label: 'Observaciones privadas' },
 ];
@@ -248,7 +248,11 @@ function applyFilters() {
     return sortState.dir === 'asc' ? cmp : -cmp;
   });
 
-  document.getElementById('admin-table-box').innerHTML = renderTable(filtered);
+  const tableBox = document.getElementById('admin-table-box');
+  const prevScroll = tableBox.querySelector('.table-wrap')?.scrollLeft ?? 0;
+  tableBox.innerHTML = renderTable(filtered);
+  const newWrap = tableBox.querySelector('.table-wrap');
+  if (newWrap) newWrap.scrollLeft = prevScroll;
   document.getElementById('admin-count').textContent = `${filtered.length} fichas`;
 
   document.querySelectorAll('.admin-name-link').forEach((btn) => {
