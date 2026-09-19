@@ -85,9 +85,9 @@ that live in Supabase, not in this repo. In order:
      from members
      where (is_member(auth.jwt() ->> 'email')
         or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email'))
-       and not exists (
+       and exists (
          select 1 from consentimientos c
-         where c.email = members.email and c.revocado_en is not null
+         where c.email = members.email and c.revocado_en is null
        );
    $$;
 
