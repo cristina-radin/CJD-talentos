@@ -26,11 +26,33 @@ const SENSITIVE_COLUMNS = [
   { key: 'telefono', label: 'Teléfono' },
   { key: 'nif', label: 'DNI' },
   { key: 'domicilio', label: 'Domicilio' },
-  { key: 'nacimiento', label: 'Nacimiento' },
-  { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No') },
+  { key: 'nacimiento', label: 'Nacimiento', sortKey: 'nacimiento' },
+  { key: 'es_menor', label: 'Menor de edad', format: (v) => (v ? 'Sí' : 'No'), sortKey: 'es_menor' },
   { key: 'alergias', label: 'Alergias' },
   { key: 'observaciones', label: 'Observaciones privadas' },
 ];
+
+let sortState = { key: 'nombre', dir: 'asc' };
+
+function compareRows(a, b, key) {
+  if (key === 'es_menor') {
+    return (a.es_menor ? 1 : 0) - (b.es_menor ? 1 : 0);
+  }
+  if (key === 'nacimiento') {
+    const av = a.nacimiento ? new Date(a.nacimiento).getTime() : -Infinity;
+    const bv = b.nacimiento ? new Date(b.nacimiento).getTime() : -Infinity;
+    return av - bv;
+  }
+  const an = `${a.apellidos ?? ''} ${a.nombre ?? ''}`.trim();
+  const bn = `${b.apellidos ?? ''} ${b.nombre ?? ''}`.trim();
+  return an.localeCompare(bn, 'es', { sensitivity: 'base' });
+}
+
+function sortHeader(key, label) {
+  const active = sortState.key === key;
+  const arrow = active ? `<span class="sort-arrow">${sortState.dir === 'asc' ? '▲' : '▼'}</span>` : '';
+  return `<th><button type="button" class="admin-sort-btn" data-sort="${key}">${label}${arrow}</button></th>`;
+}
 
 function distinctValues(rows, field) {
   return [...new Set(rows.map((r) => r[field]).filter(Boolean))].sort((a, b) =>
@@ -186,10 +208,10 @@ function renderTable(rows) {
   }
   const head = `
     <tr>
-      <th>Nombre</th>
+      ${sortHeader('nombre', 'Nombre')}
       <th>Email</th>
       <th>Grupo</th>
-      ${SENSITIVE_COLUMNS.map((c) => `<th>${c.label}</th>`).join('')}
+      ${SENSITIVE_COLUMNS.map((c) => (c.sortKey ? sortHeader(c.sortKey, c.label) : `<th>${c.label}</th>`)).join('')}
     </tr>`;
   const body = rows
     .map((row) => {
@@ -213,14 +235,17 @@ function renderTable(rows) {
 
 function applyFilters() {
   const q = document.getElementById('admin-search').value.trim().toLowerCase();
-  const ciudad = document.getElementById('admin-ciudad').value;
   const grupo = document.getElementById('admin-grupo').value;
 
   const filtered = allMembers.filter((row) => {
-    if (ciudad && row.ciudad !== ciudad) return false;
     if (grupo && row.grupo !== grupo) return false;
     if (q && !matchesText(row, q)) return false;
     return true;
+  });
+
+  filtered.sort((a, b) => {
+    const cmp = compareRows(a, b, sortState.key);
+    return sortState.dir === 'asc' ? cmp : -cmp;
   });
 
   document.getElementById('admin-table-box').innerHTML = renderTable(filtered);
@@ -230,6 +255,14 @@ function applyFilters() {
     btn.addEventListener('click', () => {
       const row = allMembers.find((r) => r.id === btn.dataset.id);
       if (row) openDetail(row);
+    });
+  });
+
+  document.querySelectorAll('.admin-sort-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      sortState = sortState.key === key ? { key, dir: sortState.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' };
+      applyFilters();
     });
   });
 }
@@ -244,9 +277,6 @@ async function renderFichasPanel(panel) {
 
   allMembers = data ?? [];
 
-  const ciudadOptions = distinctValues(allMembers, 'ciudad')
-    .map((c) => `<option value="${c}">${c}</option>`)
-    .join('');
   const grupoOptions = distinctValues(allMembers, 'grupo')
     .map((g) => `<option value="${g}">${grupoLabel(g)}</option>`)
     .join('');
@@ -258,10 +288,6 @@ async function renderFichasPanel(panel) {
         <input type="text" id="admin-search" placeholder="Nombre, ciudad, idioma…" />
       </div>
       <div class="field">
-        <label for="admin-ciudad">Ciudad de residencia</label>
-        <select id="admin-ciudad"><option value="">Todas</option>${ciudadOptions}</select>
-      </div>
-      <div class="field">
         <label for="admin-grupo">Grupo</label>
         <select id="admin-grupo"><option value="">Todos</option>${grupoOptions}</select>
       </div>
@@ -271,7 +297,6 @@ async function renderFichasPanel(panel) {
   `;
 
   document.getElementById('admin-search').addEventListener('input', applyFilters);
-  document.getElementById('admin-ciudad').addEventListener('change', applyFilters);
   document.getElementById('admin-grupo').addEventListener('change', applyFilters);
 
   applyFilters();

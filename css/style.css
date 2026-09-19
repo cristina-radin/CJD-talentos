@@ -701,6 +701,21 @@ table.admin-table td.sensitive { background: var(--danger-bg); }
   text-decoration: underline;
 }
 
+.admin-sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.admin-sort-btn:hover { color: var(--primary); }
+.admin-sort-btn .sort-arrow { color: var(--primary); margin-left: 2px; }
+
 dialog.member-dialog {
   border: none;
   border-radius: var(--radius);
