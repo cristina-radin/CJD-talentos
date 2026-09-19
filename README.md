@@ -83,8 +83,16 @@ that live in Supabase, not in this repo. In order:
             disponibilidad, habilidades_humanas, habilidades_cristianas,
             observaciones_publicas, ocd
      from members
-     where (is_member(auth.jwt() ->> 'email')
-        or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email'))
+     where (
+       (
+         is_member(auth.jwt() ->> 'email')
+         and exists (
+           select 1 from consentimientos me
+           where me.email = auth.jwt() ->> 'email' and me.revocado_en is null
+         )
+       )
+       or exists (select 1 from admins where admins.email = auth.jwt() ->> 'email')
+     )
        and exists (
          select 1 from consentimientos c
          where c.email = members.email and c.revocado_en is null
