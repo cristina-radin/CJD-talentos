@@ -87,7 +87,7 @@
         Española de Protección de Datos (aepd.es)</a>.
       </p>
 
-      <p class="policy-back"><a href="app.html">&larr; Volver a la aplicación</a></p>
+      <p class="policy-back"><a href="index.html" id="policy-back-link">&larr; Cerrar y volver a la aplicación</a></p>
     </div>
   </div>
 
@@ -95,5 +95,19 @@
     <p>Bolsa de Talentos de Carmelo Joven Descalzo — herramienta interna. Los datos que contiene son de uso exclusivo del grupo y no se comparten con terceros.</p>
     <p>© 2026 Carmelo Joven Descalzo · Contacto: Cristina Radin</p>
   </footer>
+  <script>
+    // La política se abre en una pestaña nueva desde la app: al terminar de
+    // leer, cerramos esta pestaña y la persona vuelve a donde estaba (con su
+    // sesión intacta). Si se llegó aquí de otra forma y el navegador no deja
+    // cerrarla, se vuelve atrás o, en último caso, al inicio.
+    document.getElementById('policy-back-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.close();
+      setTimeout(() => {
+        if (history.length > 1) history.back();
+        else location.href = 'index.html';
+      }, 200);
+    });
+  </script>
 </body>
 </html>
