@@ -239,7 +239,7 @@ button.btn:disabled { opacity: 0.6; cursor: not-allowed; }
   display: none;
 }
 
-.msg.show { display: block; }
+.msg.show { display: block; margin: 12px 0; }
 .msg.error { background: var(--danger-bg); color: var(--danger); }
 .msg.ok { background: var(--ok-bg); color: var(--ok); }
 
@@ -808,6 +808,9 @@ dialog.member-dialog::backdrop {
   clear: both;
   padding-top: 8px;
 }
+
+.admin-edit-btn,
+.admin-back-btn { margin-bottom: 16px; }
 
 .empty-state {
   color: var(--text-muted);

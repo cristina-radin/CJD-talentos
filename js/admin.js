@@ -162,8 +162,16 @@ function ensureDialog() {
   `;
   document.body.appendChild(dialogEl);
   dialogEl.querySelector('.member-dialog-close').addEventListener('click', () => dialogEl.close());
+  // Solo cerramos al hacer clic en el fondo si el clic también empezó ahí:
+  // si alguien selecciona texto dentro de la ficha y suelta el ratón fuera,
+  // el navegador lanza un click sobre el fondo y se perdían los cambios.
+  let startedOnBackdrop = false;
+  dialogEl.addEventListener('pointerdown', (e) => {
+    startedOnBackdrop = e.target === dialogEl;
+  });
   dialogEl.addEventListener('click', (e) => {
-    if (e.target === dialogEl) dialogEl.close();
+    if (e.target === dialogEl && startedOnBackdrop) dialogEl.close();
+    startedOnBackdrop = false;
   });
   return dialogEl;
 }
