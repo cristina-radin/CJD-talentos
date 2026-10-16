@@ -182,7 +182,7 @@ that live in Supabase, not in this repo. In order:
 
 7. **`list_signups()`** — admin-only listing of Auth accounts (used by the
    "Cuentas registradas" tab): flags accounts with no matching `members` row,
-   when their ficha was last updated, and whether they've accepted (and not
+   when their ficha was last updated, when they last used the app, and whether they've accepted (and not
    withdrawn) the data-use consent from `consentimientos` (step 11):
    ```sql
    drop function if exists list_signups();
@@ -190,7 +190,8 @@ that live in Supabase, not in this repo. In order:
    create or replace function public.list_signups()
    returns table(
      email text, created_at timestamptz, confirmado boolean, tiene_ficha boolean,
-     ficha_actualizada_en timestamptz, acepta_datos boolean, acepta_datos_en timestamptz
+     ficha_actualizada_en timestamptz, acepta_datos boolean, acepta_datos_en timestamptz,
+     ultimo_acceso timestamptz
    )
    language plpgsql
    security definer
@@ -206,7 +207,14 @@ that live in Supabase, not in this repo. In order:
             (m.email is not null) as tiene_ficha,
             m.updated_at,
             (c.user_id is not null and c.revocado_en is null) as acepta_datos,
-            c.aceptado_en
+            c.aceptado_en,
+            -- last_sign_in_at only moves on an explicit login; sessions stay
+            -- alive via refresh tokens, so the latest session refresh is a
+            -- better "last seen". greatest() ignores nulls.
+            greatest(
+              u.last_sign_in_at,
+              (select max(s.updated_at) from auth.sessions s where s.user_id = u.id)
+            ) as ultimo_acceso
      from auth.users u
      left join members m on m.email = u.email
      left join consentimientos c on c.user_id = u.id
