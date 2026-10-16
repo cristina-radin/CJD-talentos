@@ -40,6 +40,14 @@ function showMsg(el, text, isError) {
   el.className = 'msg show ' + (isError ? 'error' : 'ok');
 }
 
+if (new URLSearchParams(window.location.search).get('motivo') === 'inactividad') {
+  showMsg(
+    document.getElementById('login-msg'),
+    'Se ha cerrado la sesión por inactividad. Vuelve a iniciar sesión para continuar.',
+    false
+  );
+}
+
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim();

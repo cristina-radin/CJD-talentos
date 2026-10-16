@@ -4,6 +4,10 @@
 export const SUPABASE_URL = 'https://wramkbrxxgtauosvhynt.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_K07kJgH4bRwsD6FeYH95RA_FCW0AMiF';
 
+// Minutos sin tocar la app (ni ratón, ni teclado, ni scroll) tras los que se
+// cierra la sesión automáticamente.
+export const IDLE_LOGOUT_MINUTES = 30;
+
 // Los 4 estilos de pensamiento fijos usados en el formulario y en la búsqueda.
 // El valor (clave del objeto) es el que se guarda en la base de datos tal cual;
 // la etiqueta es solo para mostrar.

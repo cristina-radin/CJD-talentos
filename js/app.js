@@ -5,6 +5,7 @@ import { initAdmin } from './admin.js';
 import { initThemeToggle } from './theme.js';
 import { supabase } from './supabaseClient.js';
 import { ensureConsent } from './consent.js';
+import { startIdleLogout } from './idle.js';
 
 initThemeToggle('theme-toggle-btn');
 
@@ -70,7 +71,8 @@ async function main() {
   if (!session) return;
 
   document.getElementById('user-email').textContent = session.user.email;
-  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-btn').addEventListener('click', () => logout());
+  startIdleLogout();
 
   await ensureConsent(session);
 

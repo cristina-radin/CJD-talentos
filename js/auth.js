@@ -21,9 +21,11 @@ export async function redirectIfLoggedIn() {
   if (session) window.location.href = 'app.html';
 }
 
-export async function logout() {
+// `motivo` se pasa a la página de login para explicar por qué se ha salido
+// (p. ej. 'inactividad').
+export async function logout(motivo) {
   await supabase.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = motivo ? `index.html?motivo=${encodeURIComponent(motivo)}` : 'index.html';
 }
 
 // Comprueba si el email está en la tabla `admins`. La tabla admins necesita
