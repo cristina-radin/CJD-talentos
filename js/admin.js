@@ -55,9 +55,9 @@ function compareRows(a, b, key) {
   return an.localeCompare(bn, 'es', { sensitivity: 'base' });
 }
 
-function sortHeader(key, label) {
-  const active = sortState.key === key;
-  const icon = active ? (sortState.dir === 'asc' ? '▲' : '▼') : '⇅';
+function sortHeader(key, label, state = sortState) {
+  const active = state.key === key;
+  const icon = active ? (state.dir === 'asc' ? '▲' : '▼') : '⇅';
   return `<th><button type="button" class="admin-sort-btn${active ? ' active' : ''}" data-sort="${key}">${label} <span class="sort-arrow">${icon}</span></button></th>`;
 }
 
@@ -277,7 +277,7 @@ function applyFilters() {
     });
   });
 
-  document.querySelectorAll('.admin-sort-btn').forEach((btn) => {
+  tableBox.querySelectorAll('.admin-sort-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.sort;
       sortState = sortState.key === key ? { key, dir: sortState.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' };
@@ -321,41 +321,49 @@ async function renderFichasPanel(panel) {
   applyFilters();
 }
 
-async function renderSignupsPanel(panel) {
-  panel.innerHTML = '<p class="empty-state">Cargando…</p>';
+// Columnas de "Cuentas registradas". `type` decide cómo se compara al
+// ordenar; las fechas y los Sí/No empiezan en descendente (lo más reciente
+// o los "Sí" primero), que es lo que se suele buscar al pulsarlas.
+const SIGNUP_COLUMNS = [
+  { key: 'email', label: 'Email', type: 'text' },
+  { key: 'created_at', label: 'Registrado', type: 'date' },
+  { key: 'confirmado', label: 'Email confirmado', type: 'bool' },
+  { key: 'tiene_ficha', label: 'Tiene ficha', type: 'bool' },
+  { key: 'ficha_actualizada_en', label: 'Última modificación de la ficha', type: 'date' },
+  { key: 'ultimo_acceso', label: 'Último acceso', type: 'date' },
+  { key: 'acepta_datos', label: 'Acepta uso de datos', type: 'bool' },
+];
 
-  const { data, error } = await supabase.rpc('list_signups');
+let signupRows = [];
+let signupSortState = { key: 'created_at', dir: 'desc' };
 
-  if (error) {
-    panel.innerHTML = `<div class="empty-state">Error al cargar: ${error.message}</div>`;
-    return;
-  }
+function signupSortValue(row, column) {
+  const value = row[column.key];
+  if (column.type === 'bool') return value ? 1 : 0;
+  if (value == null || value === '') return null;
+  if (column.type === 'date') return new Date(value).getTime();
+  return String(value);
+}
 
-  const rows = data ?? [];
-  const sinFicha = rows.filter((r) => !r.tiene_ficha).length;
+function compareSignups(a, b) {
+  const column = SIGNUP_COLUMNS.find((c) => c.key === signupSortState.key);
+  const av = signupSortValue(a, column);
+  const bv = signupSortValue(b, column);
+  // Los vacíos (p. ej. sin ficha o sin acceso) siempre al final.
+  if (av == null || bv == null) return (av == null) - (bv == null);
+  const cmp = column.type === 'text' ? av.localeCompare(bv, 'es', { sensitivity: 'base' }) : av - bv;
+  return signupSortState.dir === 'asc' ? cmp : -cmp;
+}
 
-  if (rows.length === 0) {
-    panel.innerHTML = '<div class="empty-state">Todavía no se ha registrado nadie.</div>';
-    return;
-  }
+function renderSignupsTable(box) {
+  const rows = [...signupRows].sort(compareSignups);
+  const prevScroll = box.querySelector('.table-wrap')?.scrollLeft ?? 0;
 
-  panel.innerHTML = `
-    <div class="count-line">
-      ${rows.length} cuenta${rows.length === 1 ? '' : 's'} registrada${rows.length === 1 ? '' : 's'}
-      ${sinFicha ? ` · <strong>${sinFicha} sin ficha</strong>` : ''}
-    </div>
+  box.innerHTML = `
     <div class="table-wrap">
       <table class="admin-table">
         <thead>
-          <tr>
-            <th>Email</th>
-            <th>Registrado</th>
-            <th>Email confirmado</th>
-            <th>Tiene ficha</th>
-            <th>Última modificación de la ficha</th>
-            <th>Último acceso</th>
-            <th>Acepta uso de datos</th>
-          </tr>
+          <tr>${SIGNUP_COLUMNS.map((c) => sortHeader(c.key, c.label, signupSortState)).join('')}</tr>
         </thead>
         <tbody>
           ${rows
@@ -376,6 +384,49 @@ async function renderSignupsPanel(panel) {
       </table>
     </div>
   `;
+  box.querySelector('.table-wrap').scrollLeft = prevScroll;
+
+  box.querySelectorAll('.admin-sort-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      const column = SIGNUP_COLUMNS.find((c) => c.key === key);
+      const firstDir = column.type === 'text' ? 'asc' : 'desc';
+      signupSortState =
+        signupSortState.key === key
+          ? { key, dir: signupSortState.dir === 'asc' ? 'desc' : 'asc' }
+          : { key, dir: firstDir };
+      renderSignupsTable(box);
+    });
+  });
+}
+
+async function renderSignupsPanel(panel) {
+  panel.innerHTML = '<p class="empty-state">Cargando…</p>';
+
+  const { data, error } = await supabase.rpc('list_signups');
+
+  if (error) {
+    panel.innerHTML = `<div class="empty-state">Error al cargar: ${error.message}</div>`;
+    return;
+  }
+
+  signupRows = data ?? [];
+  const sinFicha = signupRows.filter((r) => !r.tiene_ficha).length;
+
+  if (signupRows.length === 0) {
+    panel.innerHTML = '<div class="empty-state">Todavía no se ha registrado nadie.</div>';
+    return;
+  }
+
+  const n = signupRows.length;
+  panel.innerHTML = `
+    <div class="count-line">
+      ${n} cuenta${n === 1 ? '' : 's'} registrada${n === 1 ? '' : 's'}
+      ${sinFicha ? ` · <strong>${sinFicha} sin ficha</strong>` : ''}
+    </div>
+    <div id="signups-table-box"></div>
+  `;
+  renderSignupsTable(document.getElementById('signups-table-box'));
 }
 
 export async function initAdmin() {
