@@ -61,6 +61,40 @@ function sortHeader(key, label, state = sortState) {
   return `<th><button type="button" class="admin-sort-btn${active ? ' active' : ''}" data-sort="${key}">${label} <span class="sort-arrow">${icon}</span></button></th>`;
 }
 
+// Barra de scroll horizontal también encima de la tabla, para no tener que
+// bajar hasta el final para moverse a los lados. Es un div vacío del mismo
+// ancho que la tabla cuyo scroll se sincroniza con el de `.table-wrap`.
+function addTopScrollbar(wrap) {
+  const bar = document.createElement('div');
+  bar.className = 'table-scroll-top';
+  const spacer = document.createElement('div');
+  bar.appendChild(spacer);
+  wrap.before(bar);
+
+  const resize = () => {
+    spacer.style.width = `${wrap.scrollWidth}px`;
+    bar.hidden = wrap.scrollWidth <= wrap.clientWidth;
+  };
+  resize();
+  new ResizeObserver(resize).observe(wrap);
+
+  // Evitar el eco: al mover una barra, el scroll que se le pone a la otra
+  // dispararía a su vez su propio evento.
+  let syncing = false;
+  const mirror = (from, to) => () => {
+    if (syncing) {
+      syncing = false;
+      return;
+    }
+    if (to.scrollLeft === from.scrollLeft) return;
+    syncing = true;
+    to.scrollLeft = from.scrollLeft;
+  };
+  bar.addEventListener('scroll', mirror(bar, wrap));
+  wrap.addEventListener('scroll', mirror(wrap, bar));
+  bar.scrollLeft = wrap.scrollLeft;
+}
+
 function distinctValues(rows, field) {
   return [...new Set(rows.map((r) => r[field]).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, 'es')
@@ -267,7 +301,10 @@ function applyFilters() {
   const prevScroll = tableBox.querySelector('.table-wrap')?.scrollLeft ?? 0;
   tableBox.innerHTML = renderTable(filtered);
   const newWrap = tableBox.querySelector('.table-wrap');
-  if (newWrap) newWrap.scrollLeft = prevScroll;
+  if (newWrap) {
+    newWrap.scrollLeft = prevScroll;
+    addTopScrollbar(newWrap);
+  }
   document.getElementById('admin-count').textContent = `${filtered.length} fichas`;
 
   document.querySelectorAll('.admin-name-link').forEach((btn) => {
@@ -384,7 +421,9 @@ function renderSignupsTable(box) {
       </table>
     </div>
   `;
-  box.querySelector('.table-wrap').scrollLeft = prevScroll;
+  const wrap = box.querySelector('.table-wrap');
+  wrap.scrollLeft = prevScroll;
+  addTopScrollbar(wrap);
 
   box.querySelectorAll('.admin-sort-btn').forEach((btn) => {
     btn.addEventListener('click', () => {

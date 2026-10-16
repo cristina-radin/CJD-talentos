@@ -702,6 +702,13 @@ fieldset.sensitive legend { color: var(--danger); }
 
 .table-wrap { overflow-x: auto; }
 
+.table-scroll-top {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.table-scroll-top[hidden] { display: none; }
+.table-scroll-top > div { height: 1px; }
+
 table.admin-table {
   border-collapse: collapse;
   width: 100%;
