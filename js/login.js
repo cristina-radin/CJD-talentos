@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient.js';
 import { redirectIfLoggedIn } from './auth.js';
 import { initThemeToggle } from './theme.js';
+import { resetIdleTimer } from './idle.js';
 
 redirectIfLoggedIn();
 initThemeToggle('theme-toggle-btn');
@@ -63,6 +64,7 @@ loginForm.addEventListener('submit', async (e) => {
     showMsg(msg, 'No se pudo iniciar sesión: ' + error.message, true);
     return;
   }
+  resetIdleTimer();
   window.location.href = 'app.html';
 });
 
@@ -108,6 +110,7 @@ signupForm.addEventListener('submit', async (e) => {
 
   if (data.session) {
     // Confirmación de email desactivada en el proyecto: entra directamente.
+    resetIdleTimer();
     window.location.href = 'app.html';
     return;
   }

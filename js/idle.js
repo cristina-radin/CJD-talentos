@@ -4,6 +4,17 @@ import { IDLE_LOGOUT_MINUTES } from './config.js';
 const LAST_ACTIVITY_KEY = 'ultimaActividad';
 const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'];
 
+// Llamar al iniciar sesión: si no, la hora de la sesión anterior (que
+// sigue en sessionStorage tras un cierre por inactividad) haría que la app
+// volviera a echar al usuario nada más entrar.
+export function resetIdleTimer() {
+  try {
+    sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+  } catch {
+    // Nada que borrar.
+  }
+}
+
 function readLastActivity() {
   try {
     return Number(sessionStorage.getItem(LAST_ACTIVITY_KEY)) || Date.now();
